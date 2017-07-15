@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
+const appConfigs = require('./app-configs.js');
+
 let isStreaming = false;
 
 client.on('ready', () => {
@@ -26,7 +28,6 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
         const dispatcher = conn.playFile('/mnt/c/Users/educc/Desktop/teste3.mp3');
         dispatcher.setVolume(0.5);
         dispatcher.on('end', () => {
-          console.log('left');
           newMember.voiceChannel.leave();
           isStreaming = false;
         });
@@ -40,4 +41,4 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
   }
 });
 
-client.login(proccess.env.TOKEN);
+client.login(process.env.TOKEN || appConfigs.TOKEN);
