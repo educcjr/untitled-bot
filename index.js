@@ -25,7 +25,6 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
         newMember.guild.defaultChannel.send('I\'m a weirdo.');
         isStreaming = true;
         const dispatcher = conn.playFile('/mnt/c/Users/educc/Desktop/teste3.mp3');
-        dispatcher.setVolume(0.5);
         dispatcher.on('end', () => {
           newMember.voiceChannel.leave();
           isStreaming = false;
