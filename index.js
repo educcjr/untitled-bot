@@ -20,7 +20,6 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
       !newMember.user.bot &&
       newMember.voiceChannel &&
       newMember.voiceChannelID !== oldMember.voiceChannelID) {
-
     newMember.voiceChannel.join()
       .then(conn => {
         newMember.guild.defaultChannel.send('I\'m a weirdo.');
