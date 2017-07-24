@@ -17,7 +17,6 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
-      containers:
       - name: bot
         image: gcr.io/untitled-bot-174418/bot:0.0.1
         imagePullPolicy: Always
