@@ -39,7 +39,7 @@ module.exports = (message) => {
     message.channel.send('Mete o louco que transa');
   }
 
-  if (message.content.toLowerCase().match(/savage/g)) {
+  if (message.content.toLowerCase().match(/selvagem/g)) {
     message.channel.send('Olha os caras, ofendendo os cariocas mesmo');
   }
 
