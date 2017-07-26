@@ -5,6 +5,6 @@ app.get('/', (req, res) => {
   res.send('Hooray!');
 });
 
-app.listen(8000, () => {
-  console.log('Horray!');
+app.listen(process.env.PORT, () => {
+  console.log('Horray! ' + process.env.PORT);
 });
