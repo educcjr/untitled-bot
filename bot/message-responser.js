@@ -52,6 +52,6 @@ module.exports = (message) => {
   }
 
   if (message.content.toLowerCase().match(/google/g)) {
-    message.channel.send('Murilo está presente?');
+    message.channel.send('Ele está presente?');
   }
 }
