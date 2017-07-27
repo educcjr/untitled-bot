@@ -1,2 +1,8 @@
 */node_modules
 app-configs.js
+
+web/public/*
+!web/public/index.html
+
+web/public/images/*
+!web/public/images/icon.png
