@@ -1,3 +1,4 @@
+const path = require('path');
 const https = require('https');
 const audioUrl = 'https://storage.googleapis.com/untitled-bot-174221.appspot.com/greetings.mp3';
 
@@ -5,17 +6,18 @@ class VoiceService {
   constructor (defaultChannel) {
     this.defaultChannel = defaultChannel;
     this.streaming = false;
+    this.dir = path.resolve(__dirname, '..', 'members_sounds');
 
     this.members = {
-      u7393: {name: 'murilo', url: 'members_sounds/murilo.mp3'},
-      u2588: {name: 'renan', url: 'members_sounds/renan.mp3'},
-      u2932: {name: 'vitor', url: 'members_sounds/vitor.mp3'},
-      u3489: {name: 'dodo', url: 'members_sounds/dodo.mp3'},
-      u9982: {name: 'gus', url: 'members_sounds/gus.mp3'},
-      u3306: {name: 'eduardo', url: 'members_sounds/eduardo.mp3'},
-      u3719: {name: 'ruedo', url: 'members_sounds/ruedo.mp3'},
-      u8854: {name: 'joao', url: 'members_sounds/joao.mp3'},
-      u9384: {name: 'patrick', url: 'members_sounds/patrick.mp3'}
+      u7393: {name: 'murilo', url: 'murilo.mp3'},
+      u2588: {name: 'renan', url: 'renan.mp3'},
+      u2932: {name: 'vitor', url: 'vitor.mp3'},
+      u3489: {name: 'dodo', url: 'dodo.mp3'},
+      u9982: {name: 'gus', url: 'gus.mp3'},
+      u3306: {name: 'eduardo', url: 'eduardo.mp3'},
+      u3719: {name: 'ruedo', url: 'ruedo.mp3'},
+      u8854: {name: 'joao', url: 'joao.mp3'},
+      u9384: {name: 'patrick', url: 'patrick.mp3'}
     };
   }
 
@@ -40,7 +42,9 @@ class VoiceService {
   }
 
   playLocal (url, member, conn) {
-    const dispatcher = conn.playFile(url);
+    const fileDir = path.resolve(this.dir, url);
+    console.log(fileDir);
+    const dispatcher = conn.playFile(fileDir);
     dispatcher.on('end', () => this.onDispatcherEnd(member));
     dispatcher.on('error', e => this.onDispatcherError(e, member));
   }

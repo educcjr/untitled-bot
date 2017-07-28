@@ -11,7 +11,8 @@ const CommonsChunkPlugin = new webpack.optimize.CommonsChunkPlugin({
 });
 
 const PROD = (process.env.NODE_ENV === 'production');
-const SRC_PATH = path.resolve(__dirname, 'src');
+const SRC_PATH = path.resolve(__dirname, 'web', 'src');
+const PUBLIC_PATH = path.resolve(__dirname, 'web', 'public');
 
 module.exports = {
   entry: {
@@ -19,7 +20,7 @@ module.exports = {
   },
   output: {
     filename: '[name].js',
-    path: path.resolve(__dirname, 'public')
+    path: PUBLIC_PATH
   },
   module: {
     rules: [
@@ -58,11 +59,11 @@ module.exports = {
   },
   devtool: PROD ? 'source-map' : 'cheap-module-eval-source-map',
   devServer: {
-    contentBase: path.resolve(__dirname, 'public'),
+    contentBase: PUBLIC_PATH,
     historyApiFallback: true,
     port: 9000,
     proxy: {
-      '/api': 'http://localhost:3000/'
+      '/api': 'http://localhost:5000/'
     }
   }
 };

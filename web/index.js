@@ -8,10 +8,6 @@ app.use('vendor.js', (req, res, next) => {
   next();
 });
 
-app.get('/api', (req, res) => {
-  res.send('Hooray!');
-});
-
 app.use(express.static(path.resolve(__dirname, 'public')));
 
 app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, 'public', 'index.html')));

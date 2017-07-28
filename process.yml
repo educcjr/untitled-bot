@@ -1,0 +1,7 @@
+apps:
+  - script: './web/index.js'
+    name: 'ui'
+  - script: './api/index.js'
+    name: 'api'
+  - script: './bot/index.js'
+    name: 'bot'
