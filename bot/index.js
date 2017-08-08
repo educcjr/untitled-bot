@@ -2,10 +2,14 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 
 const appConfigs = require('./app-configs.js');
+const UserService = require('./services/user-service.js');
+const userService = new UserService('http://127.0.0.1:5000');
 const MessageService = require('./services/message-service.js');
 const messageService = new MessageService();
 const VoiceService = require('./services/voice-service.js');
 const voiceService = new VoiceService();
+const CommandService = require('./services/command-service.js');
+const commandService = new CommandService(client, userService);
 
 const defaultChannelName = 'chatuba-em-texto';
 
@@ -22,7 +26,13 @@ client.on('ready', () => {
   }
 });
 
-client.on('message', messageService.reply);
+client.on('message', (message) => {
+  if (message.content.substr(0, 5) === '/ubot') {
+    commandService.execute(message.content.substr(6));
+  } else {
+    messageService.reply(message);
+  }
+});
 
 client.on('voiceStateUpdate', (oldMember, newMember) => {
   if (!voiceService.isStreaming() &&
