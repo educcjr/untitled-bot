@@ -6,15 +6,34 @@ class UserService {
   }
 
   add (user) {
-    request({
+    return this.request({
       method: 'POST',
       url: this.apiPath + '/user',
       json: user
-    }, (error, response, body) => {
-      if (error) {
-        console.log('response: ' + response);
-        console.log('error: ' + error);
-      }
+    });
+  }
+
+  list () {
+    return this.request({
+      method: 'GET',
+      url: this.apiPath + '/user'
+    });
+  }
+
+  request (configs) {
+    configs.json = configs.json ? configs.json : true;
+    return new Promise((resolve, reject) => {
+      request(configs, (error, response, body) => {
+        if (!error) {
+          if (response.statusCode === 200) {
+            resolve(body);
+          } else {
+            reject(response);
+          }
+        } else {
+          reject(error);
+        }
+      });
     });
   }
 }

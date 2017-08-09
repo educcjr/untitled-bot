@@ -1,5 +1,6 @@
 /node_modules
 app-configs.js
+keyfile.json
 
 web/public/*
 !web/public/index.html

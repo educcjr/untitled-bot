@@ -1,8 +1,4 @@
-class MessageService {
-  constructor (defaultChannel) {
-    this.defaultChannel = defaultChannel;
-  }
-
+class ReplyService {
   reply ({ content, channel, author }) {
     if (!author.bot) {
       let messageContent = content.toLowerCase();
@@ -66,4 +62,4 @@ class MessageService {
   }
 }
 
-module.exports = MessageService;
+module.exports = ReplyService;

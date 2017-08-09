@@ -1,47 +1,68 @@
+
+const withoutGroup = {
+  PING: 'ping'
+};
+const groups = {
+  LOUNGE: 'lounge'
+};
+const loungeGroup = {
+  USER_ADD: 'add-user',
+  USER_LIST: 'list-user'
+};
+
 class CommandService {
   constructor (client, userService) {
     this.client = client;
     this.userService = userService;
   }
 
-  execute (command) {
+  execute (command, { channel }) {
     let splittedCommand = command.split(' ');
-
     switch (splittedCommand[0]) {
-      case groups.USER:
-        this.userGroup(splittedCommand);
+      case groups.LOUNGE:
+        this.loungeGroup(splittedCommand, channel);
         break;
-      case withoutGroup.TEST:
-        console.log('Hooray!');
+      case withoutGroup.PING:
+        channel.send('Rá toma no cu!');
         break;
     }
   }
 
-  userGroup (splittedCommand) {
+  loungeGroup (splittedCommand, channel) {
     switch (splittedCommand[1]) {
-      case userGroup.ADD:
-        let id = splittedCommand[2].substr(2, splittedCommand[2].length - 3);
+      case loungeGroup.USER_ADD:
+        let id = splittedCommand[2]
+          .replace('<@', '')
+          .replace('>', '')
+          .replace('!', '');
         let user = this.client.users.get(id);
-        this.userService.add({id: user.id, username: user.username});
+        if (user) {
+          this.userService.add({id: user.id, name: user.username})
+            .then(result => {
+              if (result && result.data) {
+                channel.send('Usuário inserido: ```' + JSON.stringify(result.data) + '```');
+              }
+            })
+            .catch(err => defaultCatch(err, channel));
+        } else {
+          channel.send('Usuário não encontrado.');
+        }
         break;
-      case userGroup.LIST:
-        console.log('List users');
+      case loungeGroup.USER_LIST:
+        this.userService.list()
+          .then(result => {
+            if (result) {
+              for (let user of result) {
+                channel.send(user.name);
+              }
+            }
+          })
+          .catch(err => defaultCatch(err, channel));
         break;
     }
   }
 }
 
-const withoutGroup = {
-  TEST: 'test'
-};
-
-const groups = {
-  USER: 'user'
-};
-
-const userGroup = {
-  ADD: 'add',
-  LIST: 'list'
-};
+const defaultCatch = (err, channel) => { if (err) channel.send(JSON.stringify(err)); };
 
 module.exports = CommandService;
