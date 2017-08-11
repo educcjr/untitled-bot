@@ -1,6 +1,6 @@
 const path = require('path');
 const https = require('https');
-const audioUrl = 'https://storage.googleapis.com/untitled-bot-174221.appspot.com/greetings.mp3';
+const audioUrl = 'https://storage.googleapis.com/untitled-bot-174418.appspot.com/greetings.mp3';
 
 class VoiceService {
   constructor (defaultChannel) {

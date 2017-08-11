@@ -2,7 +2,6 @@ const path = require('path');
 const webpack = require('webpack');
 
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const CompressionPlugin = require('compression-webpack-plugin');
 const CommonsChunkPlugin = new webpack.optimize.CommonsChunkPlugin({
   name: 'vendor',
   minChunks: function (module) {
@@ -37,14 +36,7 @@ module.exports = {
   },
   plugins: PROD ? [
     CommonsChunkPlugin,
-    new ExtractTextPlugin('app.css'),
-    new CompressionPlugin({
-      asset: '[path].gz[query]',
-      algorithm: 'gzip',
-      test: /\.(js)$/,
-      threshold: 10240,
-      minRatio: 0.8
-    })
+    new ExtractTextPlugin('app.css')
   ] : [ CommonsChunkPlugin ],
   resolve: {
     alias: {
