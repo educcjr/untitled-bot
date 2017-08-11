@@ -44,5 +44,5 @@ jobs:
           name: gce deploy
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              ssh ${GCE_USERNAME}@${GCE_EXTERNAL_IP} "run ~/scripts/deploy.sh"
+              ssh -oStrictHostKeyChecking=no ${GCE_USERNAME}@${GCE_EXTERNAL_IP} "run ~/scripts/deploy.sh"
             fi
