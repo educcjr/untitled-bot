@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+
 const Datastore = require('@google-cloud/datastore');
 const datastore = process.env.NODE_ENV === 'production'
   ? Datastore()
@@ -9,45 +10,22 @@ const datastore = process.env.NODE_ENV === 'production'
     credentials: require('./keyfile.json')
   });
 
+const RequestService = require('./../common/request-service.js');
+const requestService = new RequestService();
+
+const openDotaRouter = require('./routers/open-dota-router.js');
+const userRouter = require('./routers/user-router.js');
+
 app.use(bodyParser.json());
 
-app.post('/user', (req, res) => {
-  let entity = {
-    key: datastore.key('User'),
-    data: {
-      discordId: req.body.id,
-      name: req.body.name
-    }
-  };
-
-  let query = datastore.createQuery('User').filter('discordId', entity.data.discordId);
-  datastore.runQuery(query, (err, entities) => {
-    if (err) sendRes(err, null, res);
-    if (entities.length > 0) {
-      entity.key = entities[0][datastore.KEY];
-    }
-
-    datastore.save(entity, (err) => {
-      sendRes(err, entity, res);
-    });
-  });
+app.use((req, res, next) => {
+  req.requestService = requestService;
+  req.datastore = datastore;
+  next();
 });
 
-app.get('/user', (req, res) => {
-  let query = datastore.createQuery('User');
-
-  datastore.runQuery(query, (err, entities) => {
-    sendRes(err, entities, res);
-  });
-});
-
-const sendRes = (err, response, res) => {
-  if (!err) {
-    res.send(response);
-  } else {
-    res.status(500).send(err);
-  }
-};
+app.use('/user', userRouter);
+app.use('/odota', openDotaRouter);
 
 const port = 5000;
 app.listen(port, () => {

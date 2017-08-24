@@ -18,7 +18,7 @@ class VoiceService {
       u3719: {name: 'ruedo', url: 'ruedo.mp3'},
       u8854: {name: 'joao', url: 'joao.mp3'},
       u9384: {name: 'patrick', url: 'cheguei.mp3'},
-      u2434: {name: 'luizzak', url: 'luiz.mp3'},
+      u2434: {name: 'luizzak', url: 'luiz.mp3'}
     };
   }
 
