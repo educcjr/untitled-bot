@@ -2,6 +2,10 @@ var express = require('express');
 var router = express.Router();
 
 router.post('/', (req, res) => {
+  if (!req.body.id || !req.body.name) {
+    return sendResult('User name or discord id missing.', res);
+  }
+
   let entity = {
     key: req.datastore.key('User'),
     data: {
@@ -12,7 +16,7 @@ router.post('/', (req, res) => {
 
   let query = req.datastore.createQuery('User').filter('discordId', entity.data.discordId);
   req.datastore.runQuery(query, (err, entities) => {
-    if (err) sendResult(err, res);
+    if (err) return sendResult(err, res);
     if (entities.length > 0) {
       entity.key = entities[0][req.datastore.KEY];
     }
@@ -32,8 +36,11 @@ router.get('/', (req, res) => {
 });
 
 const sendResult = (err, response, result) => {
-  if (!err) response.send(result);
-  else response.status(500).send(err);
+  if (err) {
+    response.status(500).send(err);
+  } else {
+    response.send(result);
+  }
 };
 
 module.exports = router;
