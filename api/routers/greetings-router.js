@@ -21,7 +21,17 @@ router.post('/audio', uploadParser.single('file'), (req, res, next) => {
     .bucket('untitled-bot-174418.appspot.com')
     .upload(req.file.path, uploadOptions, (err, file) => {
       if (err) return res.status(500).send(err);
-      // TODO: add UserGreeting entity in datastore, containing the discord user id and the new file path
+
+      req.datastore.save({
+        key: req.datastore.key('AudioGreeting'),
+        data: {
+          discordId: req.body.id,
+          name: req.file.filename
+        }
+      }, (err) => {
+        if (err) return res.status(500).send(err);
+      });
+
       res.send(req.file.filename + ' uploaded.');
     });
 });
