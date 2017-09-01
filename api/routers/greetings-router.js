@@ -6,14 +6,14 @@ const uploadDest = './../uploads/';
 const multer = require('multer');
 const uploadParser = multer({ storage: multer.diskStorage({
   destination: uploadDest,
-  filename: function (req, file, cb) {
+  filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   }
 }) });
 
 router.post('/audio', uploadParser.single('file'), (req, res, next) => {
   if (path.extname(req.file.filename) !== '.mp3') {
-    return res.status(500).send('Invalid file type.');
+    return res.status(500).send({ message: 'Tipo de arquivo incorreto. Você está enviando um áudio?' });
   }
 
   let uploadOptions = { destination: 'greetings/' + req.file.filename, public: true };
@@ -32,7 +32,7 @@ router.post('/audio', uploadParser.single('file'), (req, res, next) => {
         if (err) return res.status(500).send(err);
       });
 
-      res.send(req.file.filename + ' uploaded.');
+      res.send({filename: req.file.filename});
     });
 });
 

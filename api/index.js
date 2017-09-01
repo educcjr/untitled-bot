@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const Datastore = require('@google-cloud/datastore');
@@ -19,6 +20,7 @@ const openDotaRouter = require('./routers/open-dota-router.js');
 const userRouter = require('./routers/user-router.js');
 const greetingsRouter = require('./routers/greetings-router.js');
 
+app.use(cors());
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
