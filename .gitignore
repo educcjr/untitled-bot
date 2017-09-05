@@ -5,3 +5,4 @@ keyfile.json
 web/public/*
 !web/public/index.html
 !web/public/icon.png
+!web/public/_redirect
