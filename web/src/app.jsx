@@ -13,7 +13,7 @@ class App extends React.Component {
     this.loadUsers = this.loadUsers.bind(this);
     this.uploadAudioGreetings = this.uploadAudioGreetings.bind(this);
 
-    const apiDomain = window.document.hostname === 'www.untitled-lounge.com'
+    const apiDomain = window.document.origin === 'http://www.untitled-lounge.com'
       ? 'http://35.188.113.180'
       : 'http://localhost:5000';
     this.userService = new UserService(apiDomain);
