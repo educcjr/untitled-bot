@@ -13,8 +13,9 @@ class App extends React.Component {
     this.loadUsers = this.loadUsers.bind(this);
     this.uploadAudioGreetings = this.uploadAudioGreetings.bind(this);
 
-    // TODO: dynamic domain
-    const apiDomain = 'http://35.188.113.180/';
+    const apiDomain = window.document.hostname === 'www.untitled-lounge.com'
+      ? 'http://35.188.113.180'
+      : 'http://localhost:5000';
     this.userService = new UserService(apiDomain);
     this.greetingsService = new GreetingsService(apiDomain);
 
