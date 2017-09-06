@@ -7,8 +7,8 @@
     "build": "webpack -p",
     "start": "NODE_ENV=production pm2 startOrRestart process.yml",
     "dev": "NODE_ENV=development concurrently -k \"node ./bot/index.js\" \"node ./api/index.js\" \"webpack-dev-server\"",
-    "devbot": "NODE_ENV=development concurrently -k \"node ./bot/index.js\" \"node ./api/index.js\"",
-    "devui": "NODE_ENV=development concurrently -k \"node ./api/index.js\" \"webpack-dev-server\"",
+    "devbot": "concurrently -k \"node ./bot/index.js\" \"node ./api/index.js\"",
+    "devui": "concurrently -k \"node ./api/index.js\" \"webpack-dev-server\"",
     "devapi": "NODE_ENV=development node ./api/index.js"
   },
   "author": "",
