@@ -21,12 +21,12 @@ class CommandService {
     let splittedCommand = command.split(' ');
     
     // Match group-less first
-    if(matches(splittedCommand, withoutGroup.PING)) {
+    if(matches(splittedCommand[0], withoutGroup.PING)) {
       channel.send('Rá toma no cu!');
     }
     
     // Match grouped commands
-    if(matches(splittedCommand, groups.LOUNGE)) {
+    if(matches(splittedCommand[0], groups.LOUNGE)) {
       this.loungeGroup(splittedCommand, channel);
     }
   }
