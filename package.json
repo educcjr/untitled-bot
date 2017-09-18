@@ -7,7 +7,9 @@
     "build": "webpack -p",
     "start": "NODE_ENV=production pm2 startOrRestart process.yml",
     "dev": "NODE_ENV=development concurrently -k \"node ./bot/index.js\" \"node ./api/index.js\" \"webpack-dev-server\"",
-    "devbot": "concurrently -k \"node --inspect-brk ./bot/index.js\" \"node ./api/index.js\"",
+    "devbot": "concurrently -k \"node ./bot/index.js\" \"node ./api/index.js\"",
+    // devbot, but w/ node launching w/ breakpoints support
+    "devbotbrk": "concurrently -k \"node --inspect-brk ./bot/index.js\" \"node ./api/index.js\"",
     "devui": "concurrently -k \"node ./api/index.js\" \"webpack-dev-server\"",
     "devapi": "NODE_ENV=development node ./api/index.js"
   },
