@@ -1,3 +1,4 @@
+const _ = require('lodash');
 
 const withoutGroup = {
   PING: 'ping'
@@ -7,7 +8,7 @@ const groups = {
 };
 const loungeGroup = {
   USER_ADD: 'add-user',
-  USER_LIST: 'list-user'
+  USER_LIST: 'list-user',
 };
 
 class CommandService {
@@ -18,14 +19,31 @@ class CommandService {
 
   execute (command, { channel }) {
     let splittedCommand = command.split(' ');
-    switch (splittedCommand[0]) {
-      case groups.LOUNGE:
-        this.loungeGroup(splittedCommand, channel);
-        break;
-      case withoutGroup.PING:
-        channel.send('Rá toma no cu!');
-        break;
+    
+    // Match group-less first
+    if(matches(splittedCommand[0], withoutGroup.PING)) {
+      channel.send('Rá toma no cu!');
     }
+    
+    // Match grouped commands
+    if(matches(splittedCommand[0], groups.LOUNGE)) {
+      this.loungeGroup(splittedCommand, channel);
+    }
+  }
+
+  matches (command, group) {
+    
+    if (_.isString(group)) {
+      return group == command;
+    }
+    // Match any in array
+    if (_.isArray(group)) {
+      return group.indexOf(command) != -1;
+    }
+
+    console.log('Expected group to be either string or array, received ' + typeof(group) + ' instead.');
+
+    return false;
   }
 
   loungeGroup (splittedCommand, channel) {
