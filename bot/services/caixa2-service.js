@@ -21,6 +21,7 @@ const datastore = Datastore(gcpAuth);
  *  "to": <user_id (Discord.GuildMember.id)>,
  *  "description": String,
  *  "ammount": Number,
+ *  "accepted": Boolean,
  *  "created": Date
  * }
  */
@@ -71,16 +72,14 @@ class Caixa2Service {
         const debtsToUser = results[0]
         const debtsFromUser = results[1];
 
-        // For counting total debts from a user
-        /** @param {Array<object>} debtsArray */
-        const calculateTotal = (debtsArray) => {
-          debtsArray.reduce((total, debt) => total + debt['ammount'], 0);
-        };
-
         if (debtsToUser.length == 0 && debtsFromUser.length == 0) {
           message.channel.send('Caixa2: Nenhuma dívida aberta registrada para ' + message.member.displayName + '!');
           return;
         }
+
+        // Let's accumulate a message into one string
+        var final = "Caixa2: Resumo de " + message.member.displayName + ":\n";
+        final += "\n";
 
         // Let's group the debts per-user before presenting:
         var fromUsers = {};
@@ -91,6 +90,35 @@ class Caixa2Service {
         // user.
         fromUsers = _.groupBy(debtsToUser, (value) => value['from']);
         toUsers = _.groupBy(debtsFromUser, (value) => value['to']);
+
+        // Let's fetch pending debts first, to display and allow the user to 
+        // accept them:
+
+        var toAccept = [];
+        _.forOwn(toUsers, (debts, nick) => {
+          toAccept = _.concat(toAccept, debts.filter((debt) => !debt.accepted));
+        });
+
+        // Sort by date
+        // This is very important! If we don't, we cannot guarantee the ordering
+        // when listing and then later on accepting debts by using simple indexes.
+        _.sortBy(toAccept, (debt) => debt.created);
+
+        if(toAccept.length > 0) {
+          final += "Você tem dívidas pendentes para aceitar:\n";
+          final += "\n";
+
+          toAccept.forEach((debt, index) => {
+            final += (index + 1) + ") ";
+            final += this._formatDat$$Boyy(debt.ammount);
+            final += " de " + debt.nick_to + ": ";
+            final += "\"" + debt.description + "\"";
+          });
+
+          final += "\n";
+          final += "Digite `/ubot caixa2 aceitar <n>` para aceitar a(s) dívida(s) acima.";
+          final += "\n";
+        }
 
         // fromUsers/toUsers are right now { '<nick>': Array<Debt>, '<nick2>': ... }
         // Turn them into one dictionary as follow:
@@ -133,10 +161,6 @@ class Caixa2Service {
           debts[nick].balance += debts[nick].totalTo;
         });
 
-        // Let's accumulate a message into one string
-        var final = "Caixa2: Resumo de " + message.member.displayName + ":\n";
-        final += "\n";
-
         // Now, for printing, split the groups into two: One where balance > 0
         // (meaning other users owe to us), and another where balance < 0 (meaning
         // we owe them).
@@ -176,6 +200,8 @@ class Caixa2Service {
             final += this._getDebtBriefings(debt.debtsTo);
           }, this);
         }
+
+        message.channel.send(final);
       }).catch((error) => {
         message.channel.send('Deu merda!');
         console.log(error);
