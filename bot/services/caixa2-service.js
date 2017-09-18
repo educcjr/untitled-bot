@@ -1,5 +1,5 @@
-import * as Discord from 'discord.js'; // For autocomplete
-import * as UserService from './user-service.js';
+//import * as Discord from 'discord.js'; // For autocomplete
+//import * as UserService from './user-service.js';
 
 const moment = require('moment');
 
