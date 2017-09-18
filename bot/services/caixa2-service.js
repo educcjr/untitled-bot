@@ -69,14 +69,19 @@ class Caixa2Service {
     const userId = member.user.id;
 
     Promise
-      .all(this._getDebtsGoingTo(userId), this._getDebtsGoingFrom(userId))
-      .then((to, from) => {
-        // Resolve nicknames from each side
-        return Promise.all(
-          this._resolveNicknamesInDebts(to, message.guild),
-          this._resolveNicknamesInDebts(from, message.guild)
-        );
-      }).then((debtsToUser, debtsFromUser) => {
+      .all([this._getDebtsGoingTo(userId), this._getDebtsGoingFrom(userId)])
+      .then((results) => {
+        const to = results[0][0];
+        const from = results[1][0];
+        
+        // Resolve display names from each side
+        return Promise.all([
+          this._resolveDisplayNamesInDebts(to, message.guild),
+          this._resolveDisplayNamesInDebts(from, message.guild)
+        ]);
+      }).then((results) => {
+        const debtsToUser = results[0]
+        const debtsFromUser = results[1];
 
         // For counting total debts from a user
         /** @param {Array<object>} debtsArray */
@@ -85,7 +90,7 @@ class Caixa2Service {
         };
 
         if (debtsToUser.length == 0 && debtsFromUser.length == 0) {
-          message.channel.send('Caixa2: Nenhuma dívida aberta registrada para ' + message.member.nickname + '!');
+          message.channel.send('Caixa2: Nenhuma dívida aberta registrada para ' + message.member.displayName + '!');
           return;
         }
 
@@ -141,7 +146,7 @@ class Caixa2Service {
         });
 
         // Let's accumulate a message into one string
-        var final = "Caixa2: Resumo de " + message.member.nickname + ":\n";
+        var final = "Caixa2: Resumo de " + message.member.displayName + ":\n";
         final += "\n";
 
         // Now, for printing, split the groups into two: One where balance > 0
@@ -154,7 +159,7 @@ class Caixa2Service {
           let total = owingUs.reduce((total, debt) => total + debt['balance'], 0);
 
           final += "**Devendo** para "
-          final += message.member.nickname
+          final += message.member.displayName
           final += " (total: " + this._formatDat$$Boyy(total) + "):\n";
 
           final += "\n";
@@ -171,7 +176,7 @@ class Caixa2Service {
           let total = weOweTo.reduce((total, debt) => total - debt['balance'], 0);
 
           final += "**Dívidas** de "
-          final += message.member.nickname
+          final += message.member.displayName
           final += " (total: " + this._formatDat$$Boyy(total) + "):\n";
 
           final += "\n";
@@ -190,21 +195,21 @@ class Caixa2Service {
   }
 
   /**
-   * Resolves nicknames for the given debts against Discord.
+   * Resolves display names for the given debts against Discord.
    * Promise returns the same debt objects, but with new keys 'nick_from' and
-   * 'nick_to' for the resolved nicknames.
+   * 'nick_to' for the resolved display names.
    * 
    * @param {Array<object>} debts 
    * @param {Discord.Guild} guild
    * @returns {Promise<object>}
    */
-  _resolveNicknamesInDebts(debts, guild) {
+  _resolveDisplayNamesInDebts(debts, guild) {
     var promises =
       debts.map((debt) => {
         const fromMember =
           guild
             .fetchMember(debt['from'])
-            .then((member) => member.nickname)
+            .then((member) => member.displayName)
             .catch(() => '<desconhecido>')
             .then(name => {
               debt['nick_from'] = name;
@@ -212,13 +217,13 @@ class Caixa2Service {
 
         const toMember =
           guild.fetchMember(debt['to'])
-            .then((member) => member.nickname)
+            .then((member) => member.displayName)
             .catch(() => '<desconhecido>')
             .then(name => {
               debt['nick_to'] = name;
             });
 
-        return Promise.all(fromMember, toMember);
+        return Promise.all([fromMember, toMember]);
       }, this);
 
     return Promise.all(promises);
@@ -267,8 +272,8 @@ class Caixa2Service {
 
     return 
       Promise.all([datastore.runQuery(queryOut), datastore.runQuery(queryIn)])
-        .then((result1, result2) => {
-          return this._getTotalSumOfDebts(result1, result2);
+        .then((results) => {
+          return this._getTotalSumOfDebts(results[0][0], results[1][0]);
         });
   }
 
@@ -285,8 +290,8 @@ class Caixa2Service {
    * @returns {Number}
    */
   _getTotalSumOfDebts(debtsIn, debtsOut) {
-    const totalOut = this._calculateTotal(result1);
-    const totalIn = this._calculateTotal(result2);
+    const totalOut = this._calculateTotal(debtsOut);
+    const totalIn = this._calculateTotal(debtsIn);
 
     return totalIn - totalOut;
   }
