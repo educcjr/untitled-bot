@@ -21,19 +21,7 @@ const datastore = Datastore(gcpAuth);
  *  "to": <user_id (Discord.GuildMember.id)>,
  *  "description": String,
  *  "ammount": Number,
- *  "created": Date,
- *  "compensated": Bool, 
- *  "compensatedDate": Date
- * }
- */
-
-/*
- * TotalDebt entity keys:
- * 
- * {
- *  "from": <user_id (Discord.GuildMember.id)>,
- *  "to": <user_id (Discord.GuildMember.id)>,
- *  "ammount": Number
+ *  "created": Date
  * }
  */
 
