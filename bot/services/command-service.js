@@ -1,10 +1,16 @@
+import * as Discord from 'discord.js'; // For autocomplete
+import * as UserService from './user-service.js';
+
 const _ = require('lodash');
+const Caixa2 = require('./caixa2-service.js');
+const helper = require('../helpers/command-helpers.js');
 
 const withoutGroup = {
   PING: 'ping'
 };
 const groups = {
-  LOUNGE: 'lounge'
+  LOUNGE: 'lounge',
+  CAIXA2: [ 'caixa2', '$' ]
 };
 const loungeGroup = {
   USER_ADD: 'add-user',
@@ -12,41 +18,46 @@ const loungeGroup = {
 };
 
 class CommandService {
+  /**
+   * @param {Discord.Client} client 
+   * @param {UserService} userService 
+   */
   constructor (client, userService) {
     this.client = client;
     this.userService = userService;
+
+    this.caixa2Service = new Caixa2(client);
   }
 
-  execute (command, { channel }) {
+  /**
+   * @param {string} command 
+   * @param {Discord.Message} message 
+   */
+  execute (command, message) {
+    let channel = message.channel;
     let splittedCommand = command.split(' ');
     
     // Match group-less first
-    if(matches(splittedCommand[0], withoutGroup.PING)) {
+    if(helper.commandMatches(splittedCommand[0], withoutGroup.PING)) {
       channel.send('Rá toma no cu!');
     }
-    
+
     // Match grouped commands
-    if(matches(splittedCommand[0], groups.LOUNGE)) {
-      this.loungeGroup(splittedCommand, channel);
+    if(helper.commandMatches(splittedCommand[0], groups.LOUNGE)) {
+      this.loungeGroup(splittedCommand, message);
+    }
+    if(helper.commandMatches(splittedCommand[0], groups.CAIXA2)) {
+      this.caixa2(splittedCommand, message);
     }
   }
 
-  matches (command, group) {
+  /**
+   * @param {Array<String>} splittedCommand 
+   * @param {Discord.Message} message 
+   */
+  loungeGroup (splittedCommand, message) {
+    let channel = message.channel;
     
-    if (_.isString(group)) {
-      return group == command;
-    }
-    // Match any in array
-    if (_.isArray(group)) {
-      return group.indexOf(command) != -1;
-    }
-
-    console.log('Expected group to be either string or array, received ' + typeof(group) + ' instead.');
-
-    return false;
-  }
-
-  loungeGroup (splittedCommand, channel) {
     switch (splittedCommand[1]) {
       case loungeGroup.USER_ADD:
         let id = splittedCommand[2]
@@ -78,6 +89,14 @@ class CommandService {
           .catch(err => defaultCatch(err, channel));
         break;
     }
+  }
+
+  /**
+   * @param {Array<String>} splittedCommand 
+   * @param {Discord.Message} message 
+   */
+  caixa2 (splittedCommand, message) {
+    this.caixa2Service.process(splittedCommand, message);
   }
 }
 
