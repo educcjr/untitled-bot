@@ -1,0 +1,25 @@
+{
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "type": "node",
+                "request": "launch",
+                "name": "Launch via NPM",
+                "runtimeExecutable": "npm",
+                "runtimeArgs": [
+                    "run-script",
+                    "devbot"
+                ],
+                "port": 5858
+            },
+            {
+                "name": "Attach to Process",
+                "type": "node",
+                "protocol": "inspector",
+                "request": "attach",
+                "port": 9229,
+                "localRoot": "${workspaceRoot}",
+                "remoteRoot": "/mnt/c/Users/Luiz Fernando/Documents/dev/untitled-bot"
+            }
+        ]
+    }
