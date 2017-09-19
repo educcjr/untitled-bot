@@ -1,9 +1,10 @@
-//import * as Discord from 'discord.js'; // For autocomplete
-//import * as UserService from './user-service.js';
+// import * as Discord from 'discord.js'; // For autocomplete
+// import * as UserService from './user-service.js';
 
-const moment = require('moment');
+// const moment = require('moment');
 
 const _ = require('lodash');
+const Discord = require('discord.js');
 const Parser = require('../helpers/parser.js');
 
 const Datastore = require('@google-cloud/datastore');
@@ -15,7 +16,7 @@ const datastore = Datastore(gcpAuth);
 
 /*
  * Debt entity keys:
- * 
+ *
  * {
  *  "from": <user_id (Discord.GuildMember.id)>,
  *  "to": <user_id (Discord.GuildMember.id)>,
@@ -28,10 +29,10 @@ const datastore = Datastore(gcpAuth);
 
 class Caixa2Service {
   /**
-   * 
-   * @param {Discord.Client} client 
+   *
+   * @param {Discord.Client} client
    */
-  constructor(client) {
+  constructor (client) {
     this.client = client;
   }
 
@@ -40,21 +41,92 @@ class Caixa2Service {
    * spaces, with no `/bot`, e.g.: `caixa2 20 para vitão: da gasolina.`
    * @param {Discord.Message} message Original message
    */
-  process(splittedCommand, message) {
+  process (splittedCommand, message) {
     // Empty command- just list user's ownings
-//    if (splittedCommand.length == 1) {
-//      listOwningsShort(message.member, message);
-//      return;
-//    }
+    if (splittedCommand.length === 1) {
+      this.listOwningsShort(message.member, message);
+      return;
+    }
 
-    this.listOwningsShort(message.member, message);
+    if (splittedCommand.length === 2 && splittedCommand[1] === 'ajuda') {
+      this.describeDebtCommand(message);
+      return;
+    }
+
+    /*
+     * Debt entity keys:
+     *
+     * {
+     *  "from": <user_id (Discord.GuildMember.id)>,
+     *  "to": <user_id (Discord.GuildMember.id)>,
+     *  "description": String,
+     *  "ammount": Number,
+     *  "accepted": Boolean,
+     *  "created": Date
+     * }
+     */
+
+    try {
+      const parser = new Parser(splittedCommand.join(' '), true);
+
+      parser.nextIdent(); // Ignore, it's the 'caixa2' or '$' command.
+
+      const ammount = parser.nextFloat();
+
+      // Fetch way specifier
+      const way = parser.validateNextIdent(ident => ident === 'de' || ident === 'para');
+
+      // Only one mention per comment!
+      if (message.mentions.members.array().length < 1) {
+        throw Error();
+      }
+      const user = message.mentions.members.array()[0];
+
+      // Match user mention
+      parser.nextRegex(Discord.MessageMentions.USERS_PATTERN);
+
+      parser.nextRegex(':\\s');
+
+      // Now, the description!
+      const description = parser.remaining();
+
+      if (description.length === 0) {
+        message.channel.send('E a descrição da dívida?');
+        return;
+      }
+
+      const isSenderOwing = way === 'para';
+
+      this._recordDebt(
+        isSenderOwing ? message.author.id : user.id,
+        isSenderOwing ? user.id : message.author.id,
+        ammount, description, way === 'para')
+        .then(() => {
+          message.channel.send('Dívida de ' + this._formatDat$$Boyy(ammount) + ' registrada com sucesso!');
+        })
+        .catch((error) => {
+          message.channel.send('Deu merda!');
+          console.log(error);
+        });
+    } catch (error) {
+      console.log(error);
+      message.channel.send('Não entendi nada!');
+      this.describeDebtCommand(message);
+    }
+  }
+
+  describeDebtCommand (message) {
+    message.channel.send('Dívidas se registram assim:');
+    message.channel.send('`/ubot $ 30 [de/para] @duderas: Os 30 conto do churrasco, lesk! -xoxo`');
+    message.channel.send('Se escrever `30 de @fulano`, a dívida é de `@fulano` até você, e precisa ser confirmada');
+    message.channel.send('Se escrever `30 para @fulano`, a dívida é sua para `@fulano`, e não precisa ser confirmada!');
   }
 
   /**
    * @param {Discord.GuildMember} member
    * @param {Discord.Message} message
    */
-  listOwningsShort(member, message) {
+  listOwningsShort (member, message) {
     const userId = member.user.id;
 
     Promise
@@ -62,24 +134,24 @@ class Caixa2Service {
       .then((results) => {
         const to = results[0][0];
         const from = results[1][0];
-        
+
         // Resolve display names from each side
         return Promise.all([
           this._resolveDisplayNamesInDebts(to, message.guild),
           this._resolveDisplayNamesInDebts(from, message.guild)
         ]);
       }).then((results) => {
-        const debtsToUser = results[0]
-        const debtsFromUser = results[1];
+        const debtsToSender = results[0];
+        const debtsFromSender = results[1];
 
-        if (debtsToUser.length == 0 && debtsFromUser.length == 0) {
+        if (debtsToSender.length === 0 && debtsFromSender.length === 0) {
           message.channel.send('Caixa2: Nenhuma dívida aberta registrada para ' + message.member.displayName + '!');
           return;
         }
 
         // Let's accumulate a message into one string
-        var final = "Caixa2: Resumo de " + message.member.displayName + ":\n";
-        final += "\n";
+        var final = 'Caixa2: Resumo de ' + message.member.displayName + ':\n';
+        final += '\n';
 
         // Let's group the debts per-user before presenting:
         var fromUsers = {};
@@ -88,42 +160,40 @@ class Caixa2Service {
         // Accumulate 'from's and 'to's, every dictionary entry is the user ID,
         // with the dictionary values being arrays of the debts for the matching
         // user.
-        fromUsers = _.groupBy(debtsToUser, (value) => value['from']);
-        toUsers = _.groupBy(debtsFromUser, (value) => value['to']);
+        fromUsers = _.groupBy(debtsToSender.filter((debt) => debt.accepted), (value) => value['from']);
+        toUsers = _.groupBy(debtsFromSender.filter((debt) => debt.accepted), (value) => value['to']);
 
-        // Let's fetch pending debts first, to display and allow the user to 
+        // Let's fetch pending debts first, to display and allow the user to
         // accept them:
 
-        var toAccept = [];
-        _.forOwn(toUsers, (debts, nick) => {
-          toAccept = _.concat(toAccept, debts.filter((debt) => !debt.accepted));
-        });
+        var toAccept = debtsFromSender.filter((debt) => !debt.accepted && debt.from === userId);
 
         // Sort by date
         // This is very important! If we don't, we cannot guarantee the ordering
         // when listing and then later on accepting debts by using simple indexes.
         _.sortBy(toAccept, (debt) => debt.created);
 
-        if(toAccept.length > 0) {
-          final += "Você tem dívidas pendentes para aceitar:\n";
-          final += "\n";
+        if (toAccept.length > 0) {
+          final += 'Você tem dívidas pendentes para aceitar:\n';
+          final += '\n';
 
           toAccept.forEach((debt, index) => {
-            final += (index + 1) + ") ";
+            final += (index + 1) + ') ';
             final += this._formatDat$$Boyy(debt.ammount);
-            final += " de " + debt.nick_to + ": ";
-            final += "\"" + debt.description + "\"";
+            final += ' de ' + debt.nick_to + ': ';
+            final += '"' + debt.description + '"';
+            final += '\n';
           });
 
-          final += "\n";
-          final += "Digite `/ubot caixa2 aceitar <n>` para aceitar a(s) dívida(s) acima.";
-          final += "\n";
+          final += '\n';
+          final += 'Digite `/ubot caixa2 aceitar <n>` para aceitar a(s) dívida(s) acima.\n';
+          final += '\n';
         }
 
         // fromUsers/toUsers are right now { '<nick>': Array<Debt>, '<nick2>': ... }
         // Turn them into one dictionary as follow:
-        // debts = 
-        //   { 
+        // debts =
+        //   {
         //    '<nick>': {
         //      'debtsFrom': Array<Debt>, // Debts from <nick> to user
         //      'debtsTo': Array<Debt>,   // Debts from user to <nick>
@@ -134,7 +204,7 @@ class Caixa2Service {
         //     ...
         //   }
 
-        var debts = { };
+        var debts = {};
 
         // Pre-populate first w/ empty values for all users that this user owes
         // to and is owed from.
@@ -148,56 +218,62 @@ class Caixa2Service {
             'balance': 0
           };
         });
-        
+
         _.forOwn(fromUsers, (debtsFrom, nick) => {
+          debts[nick].nick = debtsFrom[0].nick_from;
           debts[nick].debtsFrom = debtsFrom;
-          debts[nick].totalFrom = this._getTotalSumOfDebts(debtsFrom);
-          debts[nick].balance = debts[nick].totalFrom;
+          debts[nick].totalFrom = this._calculateTotal(debtsFrom);
+          debts[nick].balance += debts[nick].totalFrom;
         });
 
         _.forOwn(toUsers, (debtsTo, nick) => {
+          debts[nick].nick = debtsTo[0].nick_to;
           debts[nick].debtsTo = debtsTo;
-          debts[nick].totalTo = this._getTotalSumOfDebts(debtsTo);
-          debts[nick].balance += debts[nick].totalTo;
+          debts[nick].totalTo = this._calculateTotal(debtsTo);
+          debts[nick].balance -= debts[nick].totalTo;
         });
 
         // Now, for printing, split the groups into two: One where balance > 0
         // (meaning other users owe to us), and another where balance < 0 (meaning
         // we owe them).
-        const owingUs =  _.filter(debts, (value) => { value.balance > 0 });
-        const weOweTo =  _.filter(debts, (value) => { value.balance < 0 });
+        const owingUs = _.filter(debts, (value) => value.balance > 0);
+        const weOweTo = _.filter(debts, (value) => value.balance < 0);
 
         if (owingUs.length > 0) {
           let total = owingUs.reduce((total, debt) => total + debt['balance'], 0);
 
-          final += "**Devendo** para "
-          final += message.member.displayName
-          final += " (total: " + this._formatDat$$Boyy(total) + "):\n";
+          final += '**Devendo** para ';
+          final += message.member.displayName;
+          final += ' (total: ' + this._formatDat$$Boyy(total) + '):\n';
 
-          final += "\n";
+          final += '\n';
 
-          owingUs.forEach(function(debt) {
+          owingUs.forEach(function (debt) {
             final += this._formatDat$$Boyy(debt.balance);
-            final += " de "
-            final += "**" + nick + "**: ";
+            final += ' de ';
+            final += '**' + debt.nick + '**: ';
             final += this._getDebtBriefings(debt.debtsFrom);
-          });
+            final += '\n';
+          }, this);
+
+          final += '\n';
         }
 
         if (weOweTo.length > 0) {
           let total = weOweTo.reduce((total, debt) => total - debt['balance'], 0);
 
-          final += "**Dívidas** de "
-          final += message.member.displayName
-          final += " (total: " + this._formatDat$$Boyy(total) + "):\n";
+          final += '**Dívidas** de ';
+          final += message.member.displayName;
+          final += ' (total: ' + this._formatDat$$Boyy(total) + '):\n';
 
-          final += "\n";
+          final += '\n';
 
-          weOweTo.forEach(function(debt) {
+          weOweTo.forEach(function (debt) {
             final += this._formatDat$$Boyy(-debt.balance); // Negate to show as positive
-            final += " para "
-            final += "**" + debt.nick + "**: ";
+            final += ' para ';
+            final += '**' + debt.nick + '**: ';
             final += this._getDebtBriefings(debt.debtsTo);
+            final += '\n';
           }, this);
         }
 
@@ -212,12 +288,12 @@ class Caixa2Service {
    * Resolves display names for the given debts against Discord.
    * Promise returns the same debt objects, but with new keys 'nick_from' and
    * 'nick_to' for the resolved display names.
-   * 
-   * @param {Array<object>} debts 
+   *
+   * @param {Array<object>} debts
    * @param {Discord.Guild} guild
    * @returns {Promise<object>}
    */
-  _resolveDisplayNamesInDebts(debts, guild) {
+  _resolveDisplayNamesInDebts (debts, guild) {
     var promises =
       debts.map((debt) => {
         const fromMember =
@@ -227,6 +303,7 @@ class Caixa2Service {
             .catch(() => '<desconhecido>')
             .then(name => {
               debt['nick_from'] = name;
+              return debt;
             });
 
         const toMember =
@@ -235,9 +312,10 @@ class Caixa2Service {
             .catch(() => '<desconhecido>')
             .then(name => {
               debt['nick_to'] = name;
+              return debt;
             });
 
-        return Promise.all([fromMember, toMember]);
+        return Promise.all([fromMember, toMember]).then(() => debt);
       }, this);
 
     return Promise.all(promises);
@@ -246,85 +324,84 @@ class Caixa2Service {
   /**
    * From an array of debts, returns the description of them all separated by
    * commas and individually surrounded by quotes.
-   * 
+   *
    * E.g.:
-   * 
+   *
    *    "\"Debt 1\", \"Debt 2\"
-   * 
-   * @param {Array<any>} debts 
+   *
+   * @param {Array<any>} debts
    * @returns {string}
    */
-  _getDebtBriefings(debts) {
+  _getDebtBriefings (debts) {
     return debts
-      .map((debt) => "\"" + debt['description'] + "\"")
+      .map((debt) => '"' + debt['description'] + '"')
       .join(', ');
   }
 
   /**
    * Returns a value that states the total debt that a given user has to another
    * user.
-   * 
-   * A positive value indicates `fromUser` owes `toUser` the value ammount, and 
+   *
+   * A positive value indicates `fromUser` owes `toUser` the value ammount, and
    * a negative value indicates `toUser` owes `fromUser`.
-   * 
-   * @param {string} user1 
-   * @param {string} user2 
+   *
+   * @param {string} user1
+   * @param {string} user2
    * @returns {Promise<Number>}
    */
-  _getTotalDebtBetween(user1, user2) {
-    const queryOut = 
+  _getTotalDebtBetween (user1, user2) {
+    const queryOut =
       datastore
         .createQuery('Debt')
         .filter('from', user1)
         .filter('to', user2);
-    
+
     const queryIn =
       datastore
         .createQuery('Debt')
         .filter('from', user2)
         .filter('to', user1);
 
-    return 
-      Promise.all([datastore.runQuery(queryOut), datastore.runQuery(queryIn)])
-        .then((results) => {
-          return this._getTotalSumOfDebts(results[0][0], results[1][0]);
-        });
+    return Promise.all([datastore.runQuery(queryOut), datastore.runQuery(queryIn)])
+      .then((results) => {
+        return this._getTotalSumOfDebts(results[0][0], results[1][0]);
+      });
   }
 
   /**
    * Returns a value that states the total debt that two sets of debts, one ingoing
    * and one outgoing (both must be between two users!) represent.
-   * 
+   *
    * A positive value indicates a first user1 owes user2 the value ammount
    * (assuming all debts from `debtsIn` are from user1 -> user2, and `debtsOut`
    * are the inverse), and a negative value indicates user1 owes user2.
-   * 
-   * @param {Array<any>} debtsIn 
-   * @param {Array<any>} debtsOut 
+   *
+   * @param {Array<any>} debtsIn
+   * @param {Array<any>} debtsOut
    * @returns {Number}
    */
-  _getTotalSumOfDebts(debtsIn, debtsOut) {
+  _getTotalSumOfDebts (debtsIn, debtsOut) {
     const totalOut = this._calculateTotal(debtsOut);
     const totalIn = this._calculateTotal(debtsIn);
 
     return totalIn - totalOut;
   }
 
-  /** 
+  /**
    * For counting total sum of ammounts in arrays of debts.
-   * 
-   * @param {Array<object>} debtsArray 
+   *
+   * @param {Array<object>} debtsArray
    * @returns Number
    */
-  _calculateTotal(debtsArray) {
+  _calculateTotal (debtsArray) {
     return debtsArray.reduce((total, debt) => total + debt['ammount'], 0);
-  };
+  }
 
   /**
    * @param {string} user
    * @returns {Promise<Array<any>>}
    */
-  _getDebtsGoingFrom(user) {
+  _getDebtsGoingFrom (user) {
     const query =
       datastore
         .createQuery('Debt')
@@ -337,7 +414,7 @@ class Caixa2Service {
    * @param {string} user
    * @returns {Promise<Array<any>>}
    */
-  _getDebtsGoingTo(user) {
+  _getDebtsGoingTo (user) {
     const query =
       datastore
         .createQuery('Debt')
@@ -349,22 +426,35 @@ class Caixa2Service {
   /**
    * Adds a new debt record.
    * Automatically deals w/ total debt records.
-   * 
+   *
    * @param {string} from User ID that debt originates from.
    * @param {string} to User ID that debt is owed to.
-   * @param {number} ammount Ammount of debt money. 
+   * @param {number} ammount Ammount of debt money.
    * @param {string} description A textual description for the debt, used to quickly
    * refer to the origin of a debt later on.
+   * @param {Booolean} accepted Whether the debt is accepted by the owing party.
+   * @returns {Promise<Void>}
    */
-  _recordDebt(from, to, ammount, description) {
-    return this._ensureHasTotalDebtEntities(from, to)
-      .then(() => {
+  _recordDebt (from, to, ammount, description, accepted) {
+    const debt = {
+      'from': from,
+      'to': to,
+      'description': description,
+      'ammount': ammount,
+      'accepted': accepted,
+      'created': new Date()
+    };
 
-      });
+    const entity = {
+      'key': datastore.key('Debt'),
+      'data': debt
+    };
+
+    return datastore.insert(entity);
   }
 
-  _formatDat$$Boyy(ammount) {
-    return "R$ " + ammount.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,");
+  _formatDat$$Boyy (ammount) {
+    return 'R$ ' + ammount.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
   }
 }
 

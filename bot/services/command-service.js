@@ -1,7 +1,6 @@
 // import * as Discord from 'discord.js'; // For autocomplete
 // import * as UserService from './user-service.js';
 
-const _ = require('lodash');
 const Caixa2 = require('./caixa2-service.js');
 const helper = require('../helpers/command-helpers.js');
 
@@ -14,13 +13,13 @@ const groups = {
 };
 const loungeGroup = {
   USER_ADD: 'add-user',
-  USER_LIST: 'list-user',
+  USER_LIST: 'list-user'
 };
 
 class CommandService {
   /**
-   * @param {Discord.Client} client 
-   * @param {UserService} userService 
+   * @param {Discord.Client} client
+   * @param {UserService} userService
    */
   constructor (client, userService) {
     this.client = client;
@@ -30,34 +29,34 @@ class CommandService {
   }
 
   /**
-   * @param {string} command 
-   * @param {Discord.Message} message 
+   * @param {string} command
+   * @param {Discord.Message} message
    */
   execute (command, message) {
     let channel = message.channel;
     let splittedCommand = command.split(' ');
-    
+
     // Match group-less first
-    if(helper.commandMatches(splittedCommand[0], withoutGroup.PING)) {
+    if (helper.commandMatches(splittedCommand[0], withoutGroup.PING)) {
       channel.send('Rá toma no cu!');
     }
 
     // Match grouped commands
-    if(helper.commandMatches(splittedCommand[0], groups.LOUNGE)) {
+    if (helper.commandMatches(splittedCommand[0], groups.LOUNGE)) {
       this.loungeGroup(splittedCommand, message);
     }
-    if(helper.commandMatches(splittedCommand[0], groups.CAIXA2)) {
+    if (helper.commandMatches(splittedCommand[0], groups.CAIXA2)) {
       this.caixa2(splittedCommand, message);
     }
   }
 
   /**
-   * @param {Array<String>} splittedCommand 
-   * @param {Discord.Message} message 
+   * @param {Array<String>} splittedCommand
+   * @param {Discord.Message} message
    */
   loungeGroup (splittedCommand, message) {
     let channel = message.channel;
-    
+
     switch (splittedCommand[1]) {
       case loungeGroup.USER_ADD:
         let id = splittedCommand[2]
@@ -92,8 +91,8 @@ class CommandService {
   }
 
   /**
-   * @param {Array<String>} splittedCommand 
-   * @param {Discord.Message} message 
+   * @param {Array<String>} splittedCommand
+   * @param {Discord.Message} message
    */
   caixa2 (splittedCommand, message) {
     this.caixa2Service.process(splittedCommand, message);
