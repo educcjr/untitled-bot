@@ -453,8 +453,13 @@ class Caixa2Service {
     return datastore.insert(entity);
   }
 
+  /**
+   * Formats a Number value into a R$ XX,XX string.
+   * @param {number} ammount
+   * @returns {string}
+   */
   _formatDat$$Boyy (ammount) {
-    return 'R$ ' + ammount.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+    return 'R$ ' + ammount.toFixed(2).replace('.', ',').replace(/(\d)(?=(\d{3})+,)/g, '$1.');
   }
 }
 
