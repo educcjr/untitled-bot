@@ -17,8 +17,8 @@ class AudioGreetings extends React.Component {
     this.props.loadUsers();
   }
 
-  componentWillUpdate(nextProps, nextState) {
-    if (nextProps.users.length > 0) {
+  componentWillUpdate (nextProps, nextState) {
+    if (nextProps.users.length > 0 && nextState.userDiscordId === '') {
       this.setState({userDiscordId: nextProps.users[0].discordId});
     }
   }
