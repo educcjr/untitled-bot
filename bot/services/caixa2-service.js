@@ -97,12 +97,12 @@ class Caixa2Service {
 
       const isSenderOwing = way === 'para';
 
-      this._recordDebt(
+      this.recordDebt(
         isSenderOwing ? message.author.id : user.id,
         isSenderOwing ? user.id : message.author.id,
         ammount, description, way === 'para')
         .then(() => {
-          message.channel.send('Dívida de ' + this._formatDat$$Boyy(ammount) + ' registrada com sucesso!');
+          message.channel.send('Dívida de ' + this.formatDat$$Boyy(ammount) + ' registrada com sucesso!');
         })
         .catch((error) => {
           message.channel.send('Deu merda!');
@@ -130,15 +130,15 @@ class Caixa2Service {
     const userId = member.user.id;
 
     Promise
-      .all([this._getDebtsGoingTo(userId), this._getDebtsGoingFrom(userId)])
+      .all([this.getDebtsGoingTo(userId), this.getDebtsGoingFrom(userId)])
       .then((results) => {
         const to = results[0][0];
         const from = results[1][0];
 
         // Resolve display names from each side
         return Promise.all([
-          this._resolveDisplayNamesInDebts(to, message.guild),
-          this._resolveDisplayNamesInDebts(from, message.guild)
+          this.resolveDisplayNamesInDebts(to, message.guild),
+          this.resolveDisplayNamesInDebts(from, message.guild)
         ]);
       }).then((results) => {
         const debtsToSender = results[0];
@@ -179,7 +179,7 @@ class Caixa2Service {
 
           toAccept.forEach((debt, index) => {
             final += (index + 1) + ') ';
-            final += this._formatDat$$Boyy(debt.ammount);
+            final += this.formatDat$$Boyy(debt.ammount);
             final += ' de ' + debt.nick_to + ': ';
             final += '"' + debt.description + '"';
             final += '\n';
@@ -222,14 +222,14 @@ class Caixa2Service {
         _.forOwn(fromUsers, (debtsFrom, nick) => {
           debts[nick].nick = debtsFrom[0].nick_from;
           debts[nick].debtsFrom = debtsFrom;
-          debts[nick].totalFrom = this._calculateTotal(debtsFrom);
+          debts[nick].totalFrom = this.calculateTotal(debtsFrom);
           debts[nick].balance += debts[nick].totalFrom;
         });
 
         _.forOwn(toUsers, (debtsTo, nick) => {
           debts[nick].nick = debtsTo[0].nick_to;
           debts[nick].debtsTo = debtsTo;
-          debts[nick].totalTo = this._calculateTotal(debtsTo);
+          debts[nick].totalTo = this.calculateTotal(debtsTo);
           debts[nick].balance -= debts[nick].totalTo;
         });
 
@@ -244,7 +244,7 @@ class Caixa2Service {
 
           final += '**Devendo** para ';
           final += message.member.displayName;
-          final += ' (total: ' + this._formatDat$$Boyy(total) + '):\n';
+          final += ' (total: ' + this.formatDat$$Boyy(total) + '):\n';
 
           final += '\n';
 
@@ -264,7 +264,7 @@ class Caixa2Service {
 
           final += '**Dívidas** de ';
           final += message.member.displayName;
-          final += ' (total: ' + this._formatDat$$Boyy(total) + '):\n';
+          final += ' (total: ' + this.formatDat$$Boyy(total) + '):\n';
 
           final += '\n';
 
@@ -293,7 +293,7 @@ class Caixa2Service {
    * @param {Discord.Guild} guild
    * @returns {Promise<object>}
    */
-  _resolveDisplayNamesInDebts (debts, guild) {
+  resolveDisplayNamesInDebts (debts, guild) {
     var promises =
       debts.map((debt) => {
         const fromMember =
@@ -332,10 +332,101 @@ class Caixa2Service {
    * @param {Array<any>} debts
    * @returns {string}
    */
-  _getDebtBriefings (debts) {
+  getDebtBriefings (debts) {
     return debts
       .map((debt) => '"' + debt['description'] + '"')
       .join(', ');
+  }
+
+  /**
+   * Given two array of debts (between two users), returns a reduced set of debts
+   * such that only debts that where not compensated yet show up.
+   *
+   * The method uses the smallest total debt ammount between the two users and
+   * uses that to figure out which debts must have been paid already from the
+   * ammount that each user owes still.
+   *
+   * Ex (debts are automatically sorted by date, from earliest -> latest):
+   *
+   * ```
+   * [       100 debt        ][40 debt][10]  - User 1 debts to User 2 = 150 total
+   * [  50 debt  ][40 debt][ 20 ]            - User 2 debts to User 1 = 110 total
+   * ```
+   *
+   * The smallest debt total is from User 2 to User 1, 110, so all debts from the
+   * two arrays counting up to 110 are removed:
+   *
+   * ```
+   * [        110 smallest      ]
+   * [       100 debt        ][40 debt][10]
+   * [  50 debt  ][40 debt][ 20 ]
+   *                            ^
+   * ```
+   *  All debts that end left from here are cut out, leaving out:
+   *
+   * ```
+   * [40 debt][10] - User 1 debts to User 2: total 50
+   * None!         - User 2 debts to User 1: total 0!
+   * ```
+   *
+   * These are to be understood as the pending debts between the two users that
+   * have not yet been fully compensated, so user 1 has two uncompensated debts
+   * to user 2.
+   *
+   * Use this method to verify debts that are pending- for precise total of debts
+   * (which account for values instead of whole debts), use `getTotalSumOfDebts`.
+   *
+   * @param {Array<any>} inDebts
+   * @param {Array<any>} outDebts
+   * @param {Array<Array<any>>}
+   */
+  returnUnpaidDebts (inDebts, outDebts) {
+    // Special cases
+    // No debts at all
+    if (inDebts.length === 0 && outDebts.length === 0) {
+      return [[], []];
+    }
+    // User 1 has all debts to User 2
+    if (inDebts.length === 0) {
+      return [[], outDebts];
+    }
+    // User 2 has all debts to User 1
+    if (outDebts.length === 0) {
+      return [inDebts, []];
+    }
+
+    const total1 = this.calculateTotal(inDebts);
+    const total2 = this.calculateTotal(outDebts);
+
+    // Users are even!
+    if (total1 === total2) {
+      return [[], []];
+    }
+
+    /**
+     * @param {Array<any>} debts
+     * @param {Number} upTo
+     * @returns {Array<any>}
+     */
+    function allDebtsUpTo (debts, upTo) {
+      var total = 0;
+      for (var i = 0; i < debts.length; i++) {
+        var debt = debts[i];
+        if (total + debt.ammount > upTo) {
+          return debts.slice(i);
+        }
+        total += debt.ammount;
+      }
+      return debts; // All debts ammount to < upTo!
+    }
+
+    if (total1 > total2) {
+      // User 1 owes more to user 2
+      return [allDebtsUpTo(inDebts, total2), []];
+    } else {
+      // User 2 owes more to user 1
+      return [[], allDebtsUpTo(outDebts, total1)];
+    }
   }
 
   /**
@@ -349,7 +440,7 @@ class Caixa2Service {
    * @param {string} user2
    * @returns {Promise<Number>}
    */
-  _getTotalDebtBetween (user1, user2) {
+  getTotalDebtBetween (user1, user2) {
     const queryOut =
       datastore
         .createQuery('Debt')
@@ -364,7 +455,7 @@ class Caixa2Service {
 
     return Promise.all([datastore.runQuery(queryOut), datastore.runQuery(queryIn)])
       .then((results) => {
-        return this._getTotalSumOfDebts(results[0][0], results[1][0]);
+        return this.getTotalSumOfDebts(results[0][0], results[1][0]);
       });
   }
 
@@ -380,9 +471,9 @@ class Caixa2Service {
    * @param {Array<any>} debtsOut
    * @returns {Number}
    */
-  _getTotalSumOfDebts (debtsIn, debtsOut) {
-    const totalOut = this._calculateTotal(debtsOut);
-    const totalIn = this._calculateTotal(debtsIn);
+  getTotalSumOfDebts (debtsIn, debtsOut) {
+    const totalOut = this.calculateTotal(debtsOut);
+    const totalIn = this.calculateTotal(debtsIn);
 
     return totalIn - totalOut;
   }
@@ -393,7 +484,7 @@ class Caixa2Service {
    * @param {Array<object>} debtsArray
    * @returns Number
    */
-  _calculateTotal (debtsArray) {
+  calculateTotal (debtsArray) {
     return debtsArray.reduce((total, debt) => total + debt['ammount'], 0);
   }
 
@@ -401,7 +492,7 @@ class Caixa2Service {
    * @param {string} user
    * @returns {Promise<Array<any>>}
    */
-  _getDebtsGoingFrom (user) {
+  getDebtsGoingFrom (user) {
     const query =
       datastore
         .createQuery('Debt')
@@ -414,7 +505,7 @@ class Caixa2Service {
    * @param {string} user
    * @returns {Promise<Array<any>>}
    */
-  _getDebtsGoingTo (user) {
+  getDebtsGoingTo (user) {
     const query =
       datastore
         .createQuery('Debt')
@@ -435,7 +526,7 @@ class Caixa2Service {
    * @param {Booolean} accepted Whether the debt is accepted by the owing party.
    * @returns {Promise<Void>}
    */
-  _recordDebt (from, to, ammount, description, accepted) {
+  recordDebt (from, to, ammount, description, accepted) {
     const debt = {
       'from': from,
       'to': to,
@@ -458,7 +549,7 @@ class Caixa2Service {
    * @param {number} ammount
    * @returns {string}
    */
-  _formatDat$$Boyy (ammount) {
+  formatDat$$Boyy (ammount) {
     return 'R$ ' + ammount.toFixed(2).replace('.', ',').replace(/(\d)(?=(\d{3})+,)/g, '$1.');
   }
 }
