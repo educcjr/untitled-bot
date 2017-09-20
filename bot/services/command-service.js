@@ -41,7 +41,7 @@ class CommandService {
     if (helper.commandMatches(splittedCommand[0], withoutGroup.PING)) {
       channel.send('Rá toma no cu!');
     }
-    if (helper.commandMatches(splittedCommand[0], withoutGroup.LIST_IDS)) {
+    if (helper.commandMatches(splittedCommand[0], groups.LIST_IDS)) {
       this.listMemberIds(splittedCommand, message);
     }
 
