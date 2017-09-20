@@ -1,5 +1,3 @@
-const path = require('path');
-const https = require('https');
 const Datastore = require('@google-cloud/datastore');
 const gcpAuth = process.env.NODE_ENV === 'production' ? {} : {
   projectId: 'untitled-bot-174418',
@@ -35,43 +33,43 @@ class VoiceService {
     });
   }
 
-  getUserAudios(userId) {
+  getUserAudios (userId) {
     const query = datastore
       .createQuery('AudioGreeting')
       .filter('discordId', userId);
-    
+
     return datastore.runQuery(query).then(entities => {
       return entities[0];
     });
   }
 
-  playRandom(audios, conn) {
+  playRandom (audios, conn) {
     const audioIndex = this.getRandomInt(1, audios.length) - 1;
     const userAudioUrl = `${urlPrefix}${audios[audioIndex].name}`;
     this.playAudio(userAudioUrl, conn);
   }
 
-  getRandomInt(min, max) {
+  getRandomInt (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  playDefault(conn) {
+  playDefault (conn) {
     this.playAudio(defaultAudioUrl, conn);
   }
 
-  playAudio(userAudioUrl, conn) {
+  playAudio (userAudioUrl, conn) {
     this.streaming = true;
     const dispatcher = conn.playArbitraryInput(userAudioUrl);
     dispatcher.on('end', () => this.onDispatcherEnd(conn));
     dispatcher.on('error', e => this.onDispatcherError(e, conn));
   }
 
-  onDispatcherEnd(conn) {
+  onDispatcherEnd (conn) {
     conn.channel.leave();
     this.streaming = false;
   }
 
-  onDispatcherError(e, conn) {
+  onDispatcherError (e, conn) {
     console.log(e);
     conn.channel.leave();
     this.streaming = false;
