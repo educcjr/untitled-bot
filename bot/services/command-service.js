@@ -87,9 +87,9 @@ class CommandService {
       return;
     }
 
-    var final = 'Usuários com status ' + status + ':';
+    var final = 'Usuários com status ' + status + ':\n';
     members.forEach((member, i) => {
-      final += (i + 1) + ') ' + member.nickname + ' id: ' + member.id;
+      final += (i + 1) + ') ' + member.displayName + ' id: ' + member.id + '\n';
     });
 
     message.channel.send(final);
