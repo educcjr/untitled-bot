@@ -9,7 +9,8 @@ const withoutGroup = {
 };
 const groups = {
   LOUNGE: 'lounge',
-  CAIXA2: [ 'caixa2', '$' ]
+  CAIXA2: [ 'caixa2', '$' ],
+  LIST_IDS: 'list-ids'
 };
 const loungeGroup = {
   USER_ADD: 'add-user',
@@ -40,6 +41,9 @@ class CommandService {
     if (helper.commandMatches(splittedCommand[0], withoutGroup.PING)) {
       channel.send('Rá toma no cu!');
     }
+    if (helper.commandMatches(splittedCommand[0], withoutGroup.LIST_IDS)) {
+      this.listMemberIds(splittedCommand, message);
+    }
 
     // Match grouped commands
     if (helper.commandMatches(splittedCommand[0], groups.LOUNGE)) {
@@ -48,6 +52,47 @@ class CommandService {
     if (helper.commandMatches(splittedCommand[0], groups.CAIXA2)) {
       this.caixa2(splittedCommand, message);
     }
+  }
+
+  /**
+   * @param {Array<string>} splittedCommand
+   * @param {Discord.Message} message
+   */
+  listMemberIds (splittedCommand, message) {
+    var status = 'all';
+    // List only online
+    if (splittedCommand.length === 1) {
+      status = 'online';
+    } else {
+      status = splittedCommand[1];
+    }
+
+    if (status !== 'online' && status !== 'offline' && status !== 'all' && status !== 'idle' && status !== 'dnd') {
+      message.channel.send('Mas o que? Que status é esse? Status reconhecidos: \'online\', \'offline\', \'idle\', \'dnd\' (do not disturb), e \'all\' para todos.');
+      return;
+    }
+
+    var members = message.guild.members.array();
+
+    members = members.filter(member => {
+      if (status === 'all') {
+        return true;
+      }
+
+      return member.presence.status === status;
+    });
+
+    if (members.length === 0) {
+      message.channel.send('Não achei ninguém não :(');
+      return;
+    }
+
+    var final = 'Usuários com status ' + status + ':';
+    members.forEach((member, i) => {
+      final += (i + 1) + ') ' + member.nickname + ' id: ' + member.id;
+    });
+
+    message.channel.send(final);
   }
 
   /**
