@@ -1,5 +1,7 @@
 import React from 'react';
 
+const audioBucket = 'https://storage.googleapis.com/untitled-bot-174418.appspot.com/greetings/';
+
 class AudioGreetings extends React.Component {
   constructor (props) {
     super(props);
@@ -51,6 +53,11 @@ class AudioGreetings extends React.Component {
       });
   }
 
+  playAudio (name) {
+    let audio = new Audio(audioBucket + name);
+    audio.play();
+  }
+
   render () {
     return (
       <div>
@@ -74,10 +81,17 @@ class AudioGreetings extends React.Component {
             </div>
           </form>
           <div>{this.state.uploadResponse}</div>
-          <div>
-            {this.state.userAudioGreetings.map((audio, index) =>
-              <div key={index}>{audio}</div>
-            )}
+          <div style={{paddingTop: '20px'}}>
+            <h3>Existing audios</h3>
+            <div style={{paddingTop: '10px'}}>
+              {this.state.userAudioGreetings.map((audio, index) =>
+                <div key={index}
+                  onClick={this.playAudio.bind(null, audio)}
+                  style={{cursor: 'pointer', marginBottom: '10px'}}>
+                  {audio}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
