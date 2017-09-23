@@ -9,7 +9,8 @@ class AudioGreetings extends React.Component {
     this.state = {
       userDiscordId: '',
       audioFile: {},
-      uploadResponse: ''
+      uploadResponse: '',
+      userAudioGreetings: []
     };
   }
 
@@ -20,6 +21,13 @@ class AudioGreetings extends React.Component {
   componentWillUpdate (nextProps, nextState) {
     if (nextProps.users.length > 0 && nextState.userDiscordId === '') {
       this.setState({userDiscordId: nextProps.users[0].discordId});
+    }
+  }
+
+  componentDidUpdate (prevProps, prevState) {
+    if (this.state.userDiscordId !== prevState.userDiscordId) {
+      this.props.greetingsService.get(this.state.userDiscordId)
+        .then(userAudioGreetings => this.setState({ userAudioGreetings }));
     }
   }
 
@@ -34,7 +42,7 @@ class AudioGreetings extends React.Component {
   onSubmit (evt) {
     evt.preventDefault();
     this.setState({uploadResponse: 'Enviando...'});
-    this.props.uploadAudioGreetings(this.state.userDiscordId, this.state.audioFile)
+    this.props.greetingsService.post(this.state.userDiscordId, this.state.audioFile)
       .then(result => {
         this.setState({uploadResponse: result.filename
           ? `Arquivo ${result.filename} enviado com sucesso.`
@@ -47,7 +55,7 @@ class AudioGreetings extends React.Component {
     return (
       <div>
         <div style={{marginBottom: '20px'}}>
-          <h1>Voice greetings</h1>
+          <h1>Audio greetings</h1>
         </div>
         <div>
           <form style={{width: '300px', textOverflow: 'ellipsis'}} onSubmit={this.onSubmit}>
@@ -66,6 +74,11 @@ class AudioGreetings extends React.Component {
             </div>
           </form>
           <div>{this.state.uploadResponse}</div>
+          <div>
+            {this.state.userAudioGreetings.map((audio, index) =>
+              <div key={index}>{audio}</div>
+            )}
+          </div>
         </div>
       </div>
     );

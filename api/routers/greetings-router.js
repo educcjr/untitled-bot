@@ -33,7 +33,9 @@ router.get('/audio/:userId', (req, res, next) => {
 
   req.datastore
     .runQuery(query)
-    .then((results) => { res.send(results[0]); });
+    .then(results => {
+      res.send(results[0].map(audioGreeting => audioGreeting.name));
+    });
 });
 
 router.post('/audio', uploadParser.single('file'), (req, res, next) => {

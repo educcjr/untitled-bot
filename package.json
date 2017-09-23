@@ -62,6 +62,8 @@
     "globals": [
       "FormData"
     ],
-    "env": [ "mocha" ]
+    "env": [
+      "mocha"
+    ]
   }
 }

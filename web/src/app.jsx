@@ -11,7 +11,6 @@ class App extends React.Component {
   constructor (props) {
     super(props);
     this.loadUsers = this.loadUsers.bind(this);
-    this.uploadAudioGreetings = this.uploadAudioGreetings.bind(this);
 
     const apiDomain = window.document.origin === 'http://www.untitled-lounge.com'
       ? 'http://35.188.113.180'
@@ -31,10 +30,6 @@ class App extends React.Component {
       }));
   }
 
-  uploadAudioGreetings (id, file) {
-    return this.greetingsService.post(id, file);
-  }
-
   render () {
     return (
       <Router>
@@ -49,7 +44,7 @@ class App extends React.Component {
             <AudioGreetings
               loadUsers={this.loadUsers}
               users={this.state.users}
-              uploadAudioGreetings={this.uploadAudioGreetings} />
+              greetingsService={this.greetingsService} />
           } />
         </div>
       </Router>

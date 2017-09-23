@@ -15,6 +15,11 @@ class GreetingsService {
     })
       .then(result => result.json());
   }
+
+  get (id) {
+    return fetch(`${this.domain}/greetings/audio/${id}`)
+      .then(result => result.json());
+  }
 }
 
 export default GreetingsService;
