@@ -14,6 +14,8 @@ const uploadParser = multer({
   })
 });
 
+const bucket = 'untitled-bot-174418.appspot.com';
+
 router.get('/audio', (req, res, next) => {
   const query = req.datastore.createQuery('AudioGreeting');
 
@@ -45,7 +47,7 @@ router.post('/audio', uploadParser.single('file'), (req, res, next) => {
 
   let uploadOptions = { destination: 'greetings/' + req.file.filename, public: true };
   req.storage
-    .bucket('untitled-bot-174418.appspot.com')
+    .bucket(bucket)
     .upload(req.file.path, uploadOptions, (err, file) => {
       if (err) return res.status(500).send(err);
 
@@ -60,6 +62,31 @@ router.post('/audio', uploadParser.single('file'), (req, res, next) => {
       });
 
       res.send({ filename: req.file.filename });
+    });
+});
+
+router.delete('/audio', (req, res, next) => {
+  let query = req.datastore
+    .createQuery('AudioGreeting')
+    .filter('name', req.body.fileName);
+
+  req.datastore
+    .runQuery(query, (err, results) => {
+      if (err) return res.status(500).send(err);
+
+      if (results.length === 0) {
+        return res.status(500).send({
+          name: '1505722302868.mp3',
+          deleted: false,
+          message: 'O arquivo 1505722302868.mp3 não existe.'
+        });
+      }
+
+      let key = results[0][req.datastore.KEY];
+      req.datastore.delete(key, (err) => {
+        if (err) req.status(500).send(err);
+        res.send({name: '1505722302868.mp3', deleted: true});
+      });
     });
 });
 
