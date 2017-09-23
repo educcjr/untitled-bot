@@ -76,16 +76,16 @@ router.delete('/audio', (req, res, next) => {
 
       if (results.length === 0) {
         return res.status(500).send({
-          name: '1505722302868.mp3',
+          name: req.body.fileName,
           deleted: false,
-          message: 'O arquivo 1505722302868.mp3 não existe.'
+          message: `O arquivo ${req.body.fileName} não existe.`
         });
       }
 
       let key = results[0][req.datastore.KEY];
       req.datastore.delete(key, (err) => {
         if (err) req.status(500).send(err);
-        res.send({name: '1505722302868.mp3', deleted: true});
+        res.send({name: req.body.fileName, deleted: true});
       });
     });
 });

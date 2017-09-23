@@ -8,11 +8,14 @@ class AudioGreetings extends React.Component {
     this.onUserChange = this.onUserChange.bind(this);
     this.onFileChange = this.onFileChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.deleteConfirmation = this.deleteConfirmation.bind(this);
+    this.deleteAudio = this.deleteAudio.bind(this);
     this.state = {
       userDiscordId: '',
       audioFile: {},
       uploadResponse: '',
-      userAudioGreetings: []
+      userAudioGreetings: [],
+      toDelete: ''
     };
   }
 
@@ -58,6 +61,16 @@ class AudioGreetings extends React.Component {
     audio.play();
   }
 
+  deleteConfirmation (name) {
+    this.setState({toDelete: name});
+    $('#deleteModal').modal('show');
+  }
+
+  deleteAudio () {
+    this.props.greetingsService.delete(this.state.toDelete);
+    $('#deleteModal').modal('hide');
+  }
+
   render () {
     return (
       <div>
@@ -86,11 +99,47 @@ class AudioGreetings extends React.Component {
             <div style={{paddingTop: '10px'}}>
               {this.state.userAudioGreetings.map((audio, index) =>
                 <div key={index}
-                  onClick={this.playAudio.bind(null, audio)}
-                  style={{cursor: 'pointer', marginBottom: '10px'}}>
-                  {audio}
+                  style={{
+                    marginBottom: '10px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}>
+                  <div onClick={() => this.playAudio(audio)}
+                    style={{
+                      cursor: 'pointer',
+                      minWidth: '50px',
+                      border: '1px solid #b1b1b1',
+                      borderRadius: '5px',
+                      display: 'inline-block',
+                      padding: '10px'
+                    }}>{audio}</div>
+                  <button
+                    style={{marginLeft: '10px', cursor: 'pointer'}}
+                    type='button'
+                    className='btn btn-danger'
+                    onClick={() => this.deleteConfirmation(audio)}
+                  >Delete</button>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+        <div className='modal fade' id='deleteModal'>
+          <div className='modal-dialog'>
+            <div className='modal-content'>
+              <div className='modal-header'>
+                <h5 className='modal-title'>Confirmation</h5>
+                <button type='button' className='close' data-dismiss='modal'>
+                  <span>&times;</span>
+                </button>
+              </div>
+              <div className='modal-body'>
+                <p>Delete {this.state.toDelete} file?</p>
+              </div>
+              <div className='modal-footer'>
+                <button type='button' className='btn btn-primary' style={{cursor: 'pointer'}} onClick={this.deleteAudio}>Delete</button>
+                <button type='button' className='btn btn-secondary' style={{cursor: 'pointer'}} data-dismiss='modal'>Close</button>
+              </div>
             </div>
           </div>
         </div>

@@ -20,6 +20,17 @@ class GreetingsService {
     return fetch(`${this.domain}/greetings/audio/${id}`)
       .then(result => result.json());
   }
+
+  delete (id) {
+    return fetch(this.domain + '/greetings/audio', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({fileName: id})
+    })
+      .then(result => result.json());
+  }
 }
 
 export default GreetingsService;
