@@ -5,11 +5,13 @@ const audioBucket = 'https://storage.googleapis.com/untitled-bot-174418.appspot.
 class AudioGreetings extends React.Component {
   constructor (props) {
     super(props);
+
     this.onUserChange = this.onUserChange.bind(this);
     this.onFileChange = this.onFileChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.deleteConfirmation = this.deleteConfirmation.bind(this);
     this.deleteAudio = this.deleteAudio.bind(this);
+
     this.state = {
       userDiscordId: '',
       audioFile: {},
@@ -49,9 +51,11 @@ class AudioGreetings extends React.Component {
     this.setState({uploadResponse: 'Enviando...'});
     this.props.greetingsService.post(this.state.userDiscordId, this.state.audioFile)
       .then(result => {
-        this.setState({uploadResponse: result.filename
-          ? `Arquivo ${result.filename} enviado com sucesso.`
-          : result.message
+        this.setState({
+          uploadResponse: result.filename
+            ? `Arquivo ${result.filename} enviado com sucesso.`
+            : result.message,
+          userAudioGreetings: [ result.filename, ...this.state.userAudioGreetings ]
         });
       });
   }
