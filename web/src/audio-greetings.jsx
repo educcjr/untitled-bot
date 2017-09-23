@@ -67,7 +67,12 @@ class AudioGreetings extends React.Component {
   }
 
   deleteAudio () {
-    this.props.greetingsService.delete(this.state.toDelete);
+    this.props.greetingsService.delete(this.state.toDelete)
+      .then(() => {
+        this.setState({
+          userAudioGreetings: this.state.userAudioGreetings.filter(file => file !== this.state.toDelete)
+        });
+      });
     $('#deleteModal').modal('hide');
   }
 
