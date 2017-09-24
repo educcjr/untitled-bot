@@ -1,46 +1,70 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+
+const userKind = process.env.NODE_ENV === 'test' ? 'UserTESTKIND' : 'User';
 
 router.post('/', (req, res) => {
   if (!req.body.id || !req.body.name) {
-    return sendResult('User name or discord id missing.', res);
+    return res
+      .status(500)
+      .send({ errorMessage: 'Nome do usuário ou discordId não foi enviado.' });
   }
 
   let entity = {
-    key: req.datastore.key('User'),
+    key: req.datastore.key(userKind),
     data: {
       discordId: req.body.id,
       name: req.body.name
     }
   };
 
-  let query = req.datastore.createQuery('User').filter('discordId', entity.data.discordId);
+  let query = req.datastore
+    .createQuery(userKind)
+    .filter('discordId', entity.data.discordId);
+
   req.datastore.runQuery(query, (err, entities) => {
-    if (err) return sendResult(err, res);
-    if (entities.length > 0) {
+    if (err) return res.status(500).send(datastoreErr(err));
+    if (entities.length > 1) {
+      return res
+        .status(500)
+        .send({
+          errorMessage: 'Existem usuários duplicados no banco de dados.'
+        });
+    }
+
+    let isNew = true;
+    if (entities.length === 1) {
       entity.key = entities[0][req.datastore.KEY];
+      isNew = false;
     }
 
     req.datastore.save(entity, (err) => {
-      sendResult(err, res, entity);
+      if (err) return res.status(500).send(datastoreErr(err));
+      res.send({ user: entity, isNew });
     });
   });
 });
 
 router.get('/', (req, res) => {
-  let query = req.datastore.createQuery('User');
-
+  let query = req.datastore.createQuery(userKind);
   req.datastore.runQuery(query, (err, entities) => {
-    sendResult(err, res, entities);
+    if (err) return res.status(500).send(datastoreErr(err));
+    res.send(entities);
   });
 });
 
-const sendResult = (err, response, result) => {
-  if (err) {
-    response.status(500).send(err);
-  } else {
-    response.send(result);
-  }
+router.delete('/:id', (req, res) => {
+  req.datastore.delete(req.datastore.key([userKind, req.datastore.int(req.params.id)]), (err, apiResponse) => {
+    if (err) return req.status(500).send(datastoreErr(err));
+    res.send({ key: req.params.id });
+  });
+});
+
+const datastoreErr = (err) => {
+  return {
+    errorMessage: 'Houve algum problema com o Datastore.',
+    errorDetails: err
+  };
 };
 
 module.exports = router;

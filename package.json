@@ -6,11 +6,11 @@
   "scripts": {
     "build": "webpack -p",
     "start": "NODE_ENV=production pm2 startOrRestart process.yml",
-    "dev": "NODE_ENV=development concurrently -k \"node ./bot/index.js\" \"node ./api/index.js\" \"webpack-dev-server\"",
+    "dev": "concurrently -k \"node ./bot/index.js\" \"node ./api/index.js\" \"webpack-dev-server\"",
     "devbot": "concurrently -k \"node ./bot/index.js\" \"node ./api/index.js\"",
     "devbotbrk": "concurrently -k \"node --inspect-brk ./bot/index.js\" \"node ./api/index.js\"",
     "devui": "concurrently -k \"node ./api/index.js\" \"webpack-dev-server\"",
-    "devapi": "NODE_ENV=development node ./api/index.js",
+    "devapi": "node ./api/index.js",
     "test": "mocha-webpack --webpack-config webpack.config-test.js \"tests/*.test.js\""
   },
   "author": "",
@@ -50,6 +50,8 @@
     "webpack-dev-server": "^2.6.1"
   },
   "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-http": "^3.0.0",
     "concurrently": "^3.5.0",
     "mocha": "^3.5.3",
     "mocha-loader": "^1.1.1",

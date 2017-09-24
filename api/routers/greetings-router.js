@@ -84,7 +84,7 @@ router.delete('/audio', (req, res, next) => {
 
       let key = results[0][req.datastore.KEY];
       req.datastore.delete(key, (err) => {
-        if (err) req.status(500).send(err);
+        if (err) return req.status(500).send(err);
         res.send({name: req.body.fileName, deleted: true});
       });
     });
