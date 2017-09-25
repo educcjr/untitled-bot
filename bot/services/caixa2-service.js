@@ -63,6 +63,17 @@ class Caixa2Service {
       return;
     }
 
+    if (splittedCommand.length === 3) {
+      switch (splittedCommand[1]) {
+        case 'aceitar':
+          this.processPendingDebtMessage(message.member, message, /* toAccept: */ true);
+          break;
+        case 'recusar':
+          this.processPendingDebtMessage(message.member, message, /* toAccept: */ false);
+          break;
+      }
+    }
+
     /*
      * Debt entity keys:
      *
@@ -95,7 +106,11 @@ class Caixa2Service {
       // Match user mention
       parser.nextRegex(Discord.MessageMentions.USERS_PATTERN);
 
-      parser.nextRegex(':\\s');
+      // Make ':' optional
+      parser.skipWhitespace();
+      if (!parser.isEoF() && parser.peek() === ':') {
+        parser.next();
+      }
 
       // Now, the description!
       const description = parser.remaining();
@@ -145,20 +160,9 @@ class Caixa2Service {
   listDebtsPendingToBeAccepted (member, message) {
     const userId = member.user.id;
 
-    Promise
-      .all([this.getDebtsGoingTo(userId), this.getDebtsGoingFrom(userId)])
-      .then((results) => {
-        const to = results[0][0];
-        const from = results[1][0];
-
-        // Resolve display names from each side
-        return Promise.all([
-          this.resolveDisplayNamesInDebts(to, message.guild),
-          this.resolveDisplayNamesInDebts(from, message.guild)
-        ]);
-      }).then((results) => {
-        const debtsFromSender = results[1];
-
+    this.getDebtsGoingFrom(userId)
+      .then(from => this.resolveDisplayNamesInDebts(from, message.guild))
+      .then(debtsFromSender => {
         var toAccept = debtsFromSender.filter((debt) => !debt.accepted && debt.from === userId);
 
         if (toAccept.length === 0) {
@@ -171,24 +175,71 @@ class Caixa2Service {
         // when listing and then later on accepting debts by using simple indexes.
         _.sortBy(toAccept, (debt) => debt.created);
 
-        var final = '';
+        this.messagePendingDebtsToAccept(toAccept, message);
+      });
+  }
 
-        final += 'Dívidas pendentes para aceitar:\n';
-        final += '\n';
+  /**
+   * @param {Discord.GuildMember} member
+   * @param {Discord.Message} message
+   */
+  processPendingDebtMessage (member, message, toAccept) {
+    const slices = message.content.split(' ');
 
-        toAccept.forEach((debt, index) => {
-          final += (index + 1) + ') ';
-          final += this.formatDat$$Boyy(debt.ammount);
-          final += ' de ' + debt.nick_to + ': ';
-          final += '"' + debt.description + '"';
-          final += '\n';
-        });
+    const index = Number.parseInt(slices[2]) - 1; // Start from 0
 
-        final += '\n';
-        final += 'Digite `/ubot caixa2 aceitar <n>` para aceitar a(s) dívida(s) acima.\n';
-        final += '\n';
+    // Get number of opened debts remaining
+    const userId = member.user.id;
 
-        message.channel.send(final);
+    this.getDebtsGoingFrom(userId)
+      .then(from => this.resolveDisplayNamesInDebts(from, message.guild))
+      .then(debtsFromSender => {
+        /** @type {Array<any>} */
+        var toAccept = debtsFromSender.filter((debt) => !debt.accepted && debt.from === userId);
+
+        // Sort by date
+        // This is very important! If we don't, we cannot guarantee the ordering
+        // when listing and then later on accepting debts by using simple indexes.
+        _.sortBy(toAccept, (debt) => debt.created);
+
+        if (index < 0 || index >= toAccept.length) {
+          message.send('Número de dívida pendente inválido!');
+
+          if (toAccept.length > 0) {
+            this.messagePendingDebtsToAccept(toAccept, message);
+          }
+
+          return;
+        }
+
+        // Accept (or reject)!
+        const entity = toAccept[index];
+
+        if (toAccept) {
+          entity.accepted = true;
+          return datastore.update(entity).then(() => entity);
+        } else {
+          return datastore.delete(entity).then(() => entity);
+        }
+      }).then(entity => {
+        // Just for funzzies, append a random tidbit at the end of the messages
+        const bitsAccept = [
+          'Bem vindo ao círculo interminável do capitalismo!',
+          'Melhor já arranjar um segundo turno no trabalho!',
+          'Juros: de 0% até seja-lá-a-paciência-do-' + entity.nick_to + '%!',
+          'Melhor pagar essa porra, hein :3'
+        ];
+        const bitsReject = [
+          'Tá certo! Seja mais frugal (ou caloteiro)!',
+          'Nada como não ter dívidas e ter a consciência limpa! Espero que um dia você consiga saber o que é isso!',
+          'Um assassino de aluguel já foi encomendado para recolher a dívida!'
+        ];
+
+        if (toAccept) {
+          message.channel.send('Dívida aceita com sucesso! ' + _.shuffle(bitsAccept)[0]);
+        } else {
+          message.channel.send('Dívida recusada com sucesso! ' + _.shuffle(bitsReject)[0]);
+        }
       });
   }
 
@@ -612,6 +663,24 @@ class Caixa2Service {
     };
 
     return datastore.insert(entity);
+  }
+
+  messagePendingDebtsToAccept (toAccept, message) {
+    var final = '';
+    final += 'Dívidas pendentes para aceitar:\n';
+    final += '\n';
+    toAccept.forEach((debt, index) => {
+      final += (index + 1) + ') ';
+      final += this.formatDat$$Boyy(debt.ammount);
+      final += ' de ' + debt.nick_to + ': ';
+      final += '"' + debt.description + '"';
+      final += '\n';
+    });
+    final += '\n';
+    final += 'Digite `/ubot caixa2 aceitar/recusar <n>` para aceitar/recusar a(s) dívida(s) acima.\n';
+    final += '\n';
+
+    message.channel.send(final);
   }
 
   /**
