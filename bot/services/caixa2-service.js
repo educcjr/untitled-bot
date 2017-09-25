@@ -48,8 +48,18 @@ class Caixa2Service {
       return;
     }
 
-    if (splittedCommand.length === 2 && splittedCommand[1] === 'ajuda') {
-      this.describeDebtCommand(message);
+    if (splittedCommand.length === 2) {
+      switch (splittedCommand[1]) {
+        case 'ajuda':
+          this.describeDebtCommand(message);
+          break;
+        case 'nova':
+        case 'novas':
+          this.listDebtsPendingToBeAccepted(message.member, message);
+          break;
+        default:
+          message.channel.send('Tendi foi é nada.');
+      }
       return;
     }
 
@@ -116,10 +126,70 @@ class Caixa2Service {
   }
 
   describeDebtCommand (message) {
-    message.channel.send('Dívidas se registram assim:');
-    message.channel.send('`/ubot $ 30 [de/para] @duderas: Os 30 conto do churrasco, lesk! -xoxo`');
-    message.channel.send('Se escrever `30 de @fulano`, a dívida é de `@fulano` até você, e precisa ser confirmada');
-    message.channel.send('Se escrever `30 para @fulano`, a dívida é sua para `@fulano`, e não precisa ser confirmada!');
+    var final = '';
+
+    final += 'Dívidas se registram assim:\n';
+
+    final += '`/ubot $ 30 [de/para] @duderas: Os 30 conto do churrasco, lesk! -xoxo`\n';
+    final += '`/ubot $ 30 [de/para] @duderas: Os 30 conto do churrasco, lesk! -xoxo`\n';
+    final += 'Se escrever `30 de @fulano`, a dívida é de `@fulano` até você, e precisa ser confirmada\n';
+    final += 'Se escrever `30 para @fulano`, a dívida é sua para `@fulano`, e não precisa ser confirmada!';
+
+    message.channel.send(final);
+  }
+
+  /**
+   * @param {Discord.GuildMember} member
+   * @param {Discord.Message} message
+   */
+  listDebtsPendingToBeAccepted (member, message) {
+    const userId = member.user.id;
+
+    Promise
+      .all([this.getDebtsGoingTo(userId), this.getDebtsGoingFrom(userId)])
+      .then((results) => {
+        const to = results[0][0];
+        const from = results[1][0];
+
+        // Resolve display names from each side
+        return Promise.all([
+          this.resolveDisplayNamesInDebts(to, message.guild),
+          this.resolveDisplayNamesInDebts(from, message.guild)
+        ]);
+      }).then((results) => {
+        const debtsFromSender = results[1];
+
+        var toAccept = debtsFromSender.filter((debt) => !debt.accepted && debt.from === userId);
+
+        if (toAccept.length === 0) {
+          message.channel.send('Caixa2: Nenhuma dívida pendente para ' + message.member.displayName + '!');
+          return;
+        }
+
+        // Sort by date
+        // This is very important! If we don't, we cannot guarantee the ordering
+        // when listing and then later on accepting debts by using simple indexes.
+        _.sortBy(toAccept, (debt) => debt.created);
+
+        var final = '';
+
+        final += 'Dívidas pendentes para aceitar:\n';
+        final += '\n';
+
+        toAccept.forEach((debt, index) => {
+          final += (index + 1) + ') ';
+          final += this.formatDat$$Boyy(debt.ammount);
+          final += ' de ' + debt.nick_to + ': ';
+          final += '"' + debt.description + '"';
+          final += '\n';
+        });
+
+        final += '\n';
+        final += 'Digite `/ubot caixa2 aceitar <n>` para aceitar a(s) dívida(s) acima.\n';
+        final += '\n';
+
+        message.channel.send(final);
+      });
   }
 
   /**
