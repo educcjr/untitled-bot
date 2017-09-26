@@ -67,10 +67,10 @@ class Caixa2Service {
       switch (splittedCommand[1]) {
         case 'aceitar':
           this.processPendingDebtMessage(message.member, message, /* toAccept: */ true);
-          break;
+          return;
         case 'recusar':
           this.processPendingDebtMessage(message.member, message, /* toAccept: */ false);
-          break;
+          return;
       }
     }
 
@@ -161,7 +161,7 @@ class Caixa2Service {
     const userId = member.user.id;
 
     this.getDebtsGoingFrom(userId)
-      .then(from => this.resolveDisplayNamesInDebts(from, message.guild))
+      .then(results => this.resolveDisplayNamesInDebts(results[0], message.guild))
       .then(debtsFromSender => {
         var toAccept = debtsFromSender.filter((debt) => !debt.accepted && debt.from === userId);
 
@@ -182,17 +182,19 @@ class Caixa2Service {
   /**
    * @param {Discord.GuildMember} member
    * @param {Discord.Message} message
+   * @param {Boolean} accepting
    */
-  processPendingDebtMessage (member, message, toAccept) {
+  processPendingDebtMessage (member, message, accepting) {
     const slices = message.content.split(' ');
+    // slices: [ '/ubot', 'caixa2', 'aceitar'/'recusar', 1 ];
 
-    const index = Number.parseInt(slices[2]) - 1; // Start from 0
+    const index = Number.parseInt(slices[3]) - 1; // Start from 0
 
     // Get number of opened debts remaining
     const userId = member.user.id;
 
     this.getDebtsGoingFrom(userId)
-      .then(from => this.resolveDisplayNamesInDebts(from, message.guild))
+      .then(results => this.resolveDisplayNamesInDebts(results[0], message.guild))
       .then(debtsFromSender => {
         /** @type {Array<any>} */
         var toAccept = debtsFromSender.filter((debt) => !debt.accepted && debt.from === userId);
@@ -203,23 +205,31 @@ class Caixa2Service {
         _.sortBy(toAccept, (debt) => debt.created);
 
         if (index < 0 || index >= toAccept.length) {
-          message.send('Número de dívida pendente inválido!');
+          message.channel.send('Número de dívida pendente inválido!');
 
           if (toAccept.length > 0) {
             this.messagePendingDebtsToAccept(toAccept, message);
           }
 
-          return;
+          throw new Error('Cancel');
         }
 
         // Accept (or reject)!
-        const entity = toAccept[index];
+        const debt = toAccept[index];
 
-        if (toAccept) {
-          entity.accepted = true;
-          return datastore.update(entity).then(() => entity);
+        if (accepting) {
+          if (accepting) {
+            debt.accepted = true;
+          }
+
+          const entity = {
+            key: debt[Datastore.KEY],
+            entity: debt
+          };
+          debt.accepted = true;
+          return datastore.update(entity).then(() => debt);
         } else {
-          return datastore.delete(entity).then(() => entity);
+          return datastore.delete(debt[Datastore.KEY]).then(() => debt);
         }
       }).then(entity => {
         // Just for funzzies, append a random tidbit at the end of the messages
@@ -235,11 +245,17 @@ class Caixa2Service {
           'Um assassino de aluguel já foi encomendado para recolher a dívida!'
         ];
 
-        if (toAccept) {
+        if (accepting) {
           message.channel.send('Dívida aceita com sucesso! ' + _.shuffle(bitsAccept)[0]);
         } else {
           message.channel.send('Dívida recusada com sucesso! ' + _.shuffle(bitsReject)[0]);
         }
+      }).catch(error => {
+        if (message === 'Cancel') {
+          return;
+        }
+        message.channel.send('Merdo tudo! Chama os dev!');
+        console.log(error);
       });
   }
 
@@ -370,10 +386,12 @@ class Caixa2Service {
           final += '\n';
 
           owingUs.forEach(function (debt) {
-            final += this._formatDat$$Boyy(debt.balance);
+            const rem = this.returnUnpaidDebts(debt.debtsFrom, debt.debtsTo)[0];
+
+            final += this.formatDat$$Boyy(debt.balance);
             final += ' de ';
             final += '**' + debt.nick + '**: ';
-            final += this._getDebtBriefings(debt.debtsFrom);
+            final += this.getDebtBriefings(rem);
             final += '\n';
           }, this);
 
@@ -390,10 +408,12 @@ class Caixa2Service {
           final += '\n';
 
           weOweTo.forEach(function (debt) {
-            final += this._formatDat$$Boyy(-debt.balance); // Negate to show as positive
+            const rem = this.returnUnpaidDebts(debt.debtsFrom, debt.debtsTo)[1];
+
+            final += this.formatDat$$Boyy(-debt.balance); // Negate to show as positive
             final += ' para ';
             final += '**' + debt.nick + '**: ';
-            final += this._getDebtBriefings(debt.debtsTo);
+            final += this.getDebtBriefings(rem);
             final += '\n';
           }, this);
         }
@@ -675,7 +695,7 @@ class Caixa2Service {
       final += ' de ' + debt.nick_to + ': ';
       final += '"' + debt.description + '"';
       final += '\n';
-    });
+    }, this);
     final += '\n';
     final += 'Digite `/ubot caixa2 aceitar/recusar <n>` para aceitar/recusar a(s) dívida(s) acima.\n';
     final += '\n';
