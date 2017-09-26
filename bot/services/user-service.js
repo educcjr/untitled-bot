@@ -20,6 +20,7 @@ class UserService {
     });
   }
 
+  // TODO: use common/request-service
   request (configs) {
     configs.json = configs.json ? configs.json : true;
     return new Promise((resolve, reject) => {
