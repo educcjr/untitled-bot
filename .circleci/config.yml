@@ -19,7 +19,6 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ arch }}-{{ checksum "package.json" }}
 
-      # run tests!
       - run: npm test
 
       - add_ssh_keys:
