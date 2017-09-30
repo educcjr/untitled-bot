@@ -34,7 +34,7 @@ app.use('/user', userRouter);
 app.use('/odota', openDotaRouter);
 app.use('/greetings', greetingsRouter);
 
-const port = 5000;
+const port = process.env.NODE_ENV === 'test' ? 5050 : 5000;
 app.listen(port, () => {
   console.log('Api running on: ' + port);
   console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
