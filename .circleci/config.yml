@@ -19,8 +19,6 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ arch }}-{{ checksum "package.json" }}
 
-      - run: npm test
-
       - add_ssh_keys:
           fingerprints:
             - "0b:e9:9d:57:1c:8a:82:ab:92:d4:cf:56:b2:d1:3f:5f"
