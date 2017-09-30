@@ -8,27 +8,27 @@ jobs:
       - checkout
 
       - restore_cache:
-        keys:
-          - v1-dependencies-{{ arch }}-{{ checksum "package.json" }}
-          - v1-dependencies-{{ arch }}
+          keys:
+            - v1-dependencies-{{ arch }}-{{ checksum "package.json" }}
+            - v1-dependencies-{{ arch }}
 
       - run: npm install
 
       - save_cache:
-        paths:
-          - node_modules
-        key: v1-dependencies-{{ arch }}-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ arch }}-{{ checksum "package.json" }}
 
       # run tests!
       - run: npm test
 
       - add_ssh_keys:
-        fingerprints:
-          - "0b:e9:9d:57:1c:8a:82:ab:92:d4:cf:56:b2:d1:3f:5f"
+          fingerprints:
+            - "0b:e9:9d:57:1c:8a:82:ab:92:d4:cf:56:b2:d1:3f:5f"
 
       - deploy:
-        name: gce deploy
-        command: |
-          if [ "${CIRCLE_BRANCH}" == "master" ]; then
-            ssh -oStrictHostKeyChecking=no ${GCE_USERNAME}@${GCE_EXTERNAL_IP} "bash ~/scripts/deploy.sh"
-          fi
+          name: gce deploy
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              ssh -oStrictHostKeyChecking=no ${GCE_USERNAME}@${GCE_EXTERNAL_IP} "bash ~/scripts/deploy.sh"
+            fi
