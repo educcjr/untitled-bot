@@ -11,7 +11,7 @@
     "devbotbrk": "concurrently -k \"node --inspect-brk ./bot/index.js\" \"node ./api/index.js\"",
     "devui": "concurrently -k \"node ./api/index.js\" \"webpack-dev-server\"",
     "devapi": "node ./api/index.js",
-    "test": "mocha-webpack --webpack-config webpack.config-test.js \"tests/*.test.js\""
+    "test": "mocha"
   },
   "author": "",
   "license": "ISC",
