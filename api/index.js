@@ -8,7 +8,7 @@ const Storage = require('@google-cloud/storage');
 
 const gcpAuth = process.env.NODE_ENV === 'production' ? {} : {
   projectId: 'untitled-bot-174418',
-  credentials: process.env.KEY_FILE_GCP || require('./keyfile.json')
+  credentials: require('./keyfile.json')
 };
 const datastore = Datastore(gcpAuth);
 const storage = Storage(gcpAuth);
