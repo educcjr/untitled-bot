@@ -22,6 +22,7 @@ let defaultChannel;
 
 client.on('ready', () => {
   console.log('I am ready!');
+  console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 
   defaultChannel = client.channels.find(channel => channel.type === 'text' && channel.name === defaultChannelName);
   if (defaultChannel == null) {
@@ -48,4 +49,4 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
   }
 });
 
-client.login(process.env.TOKEN || appConfigs.TOKEN);
+client.login(appConfigs.TOKEN);

@@ -37,6 +37,7 @@ app.use('/greetings', greetingsRouter);
 const port = 5000;
 app.listen(port, () => {
   console.log('Api running on: ' + port);
+  console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 });
 
 module.exports = app;
