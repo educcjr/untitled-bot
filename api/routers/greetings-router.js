@@ -16,7 +16,7 @@ const uploadParser = multer({
 const greetingsPath = 'greetings/';
 
 router.get('/audio', (req, res, next) => {
-  const query = req.datastore.createQuery('AudioGreeting');
+  const query = req.datastore.createQuery(req.datastoreKinds.AUDIO_GREETING);
 
   req.datastore
     .runQuery(query)
@@ -29,7 +29,7 @@ router.get('/audio/:userId', (req, res, next) => {
   }
 
   const query = req.datastore
-    .createQuery('AudioGreeting')
+    .createQuery(req.datastoreKinds.AUDIO_GREETING)
     .filter('discordId', req.params.userId);
 
   req.datastore
@@ -53,7 +53,7 @@ router.post('/audio', uploadParser.single('file'), (req, res, next) => {
       if (err) return res.status(500).send(err);
 
       req.datastore.save({
-        key: req.datastore.key('AudioGreeting'),
+        key: req.datastore.key(req.datastoreKinds.AUDIO_GREETING),
         data: {
           discordId: req.body.id,
           name: req.file.filename
@@ -71,7 +71,7 @@ router.post('/audio', uploadParser.single('file'), (req, res, next) => {
 
 router.delete('/audio', (req, res, next) => {
   let query = req.datastore
-    .createQuery('AudioGreeting')
+    .createQuery(req.datastoreKinds.AUDIO_GREETING)
     .filter('name', req.body.fileName);
 
   req.datastore

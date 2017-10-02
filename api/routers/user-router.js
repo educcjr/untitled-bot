@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-const userKind = process.env.NODE_ENV === 'test' ? 'UserTESTKIND' : 'User';
-
 router.post('/', (req, res) => {
   if (!req.body.id || !req.body.name) {
     return res
@@ -11,7 +9,7 @@ router.post('/', (req, res) => {
   }
 
   let entity = {
-    key: req.datastore.key(userKind),
+    key: req.datastore.key(req.datastoreKinds.USER),
     data: {
       discordId: req.body.id,
       name: req.body.name
@@ -19,7 +17,7 @@ router.post('/', (req, res) => {
   };
 
   let query = req.datastore
-    .createQuery(userKind)
+    .createQuery(req.datastoreKinds.USER)
     .filter('discordId', entity.data.discordId);
 
   req.datastore.runQuery(query, (err, entities) => {
@@ -46,7 +44,7 @@ router.post('/', (req, res) => {
 });
 
 router.get('/', (req, res) => {
-  let query = req.datastore.createQuery(userKind);
+  let query = req.datastore.createQuery(req.datastoreKinds.USER);
   req.datastore.runQuery(query, (err, entities) => {
     if (err) return res.status(500).send(datastoreErr(err));
     res.send(entities);
@@ -54,7 +52,7 @@ router.get('/', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  req.datastore.delete(req.datastore.key([userKind, req.datastore.int(req.params.id)]), (err, apiResponse) => {
+  req.datastore.delete(req.datastore.key([req.datastoreKinds.USER, req.datastore.int(req.params.id)]), (err, apiResponse) => {
     if (err) return req.status(500).send(datastoreErr(err));
     res.send({ key: req.params.id });
   });
