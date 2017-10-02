@@ -1,7 +1,3 @@
-const baseBucketDomain = 'https://storage.googleapis.com/untitled-bot-174418.appspot.com';
-const defaultAudioUrl = `${baseBucketDomain}/greetings.mp3`;
-const bucketDomain = `${baseBucketDomain}/greetings/`;
-
 class VoiceService {
   constructor (apiPath, requestService) {
     this.apiPath = apiPath;
@@ -19,14 +15,8 @@ class VoiceService {
         this.streaming = true;
         this.requestService.get(`${this.apiPath}/greetings/audio/${member.user.id}`)
           .then(audios => {
-            let audioUrl = defaultAudioUrl;
-
-            if (audios.length > 0) {
-              const audioIndex = this.getRandomInt(1, audios.length) - 1;
-              audioUrl = `${bucketDomain}${audios[audioIndex]}`;
-            }
-
-            this.playAudio(audioUrl, conn);
+            const audioIndex = this.getRandomInt(1, audios.length) - 1;
+            this.playAudio(audios[audioIndex].path, conn);
           });
       })
       .catch(err => console.log(err));

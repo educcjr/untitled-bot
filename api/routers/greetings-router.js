@@ -35,10 +35,15 @@ router.get('/audio/:userId', (req, res, next) => {
   req.datastore
     .runQuery(query)
     .then(([result, ...rest]) => {
-      res.send(result.map(audioGreeting => ({
-        path: `${req.bucketUrl}${greetingsPath}${audioGreeting.name}`,
-        name: audioGreeting.name
-      })));
+      if (result.length > 0) {
+        res.send(result.map(audioGreeting => ({
+          path: `${req.bucketUrl}${greetingsPath}${audioGreeting.name}`,
+          name: audioGreeting.name
+        })));
+      } else {
+        let name = 'greetings.mp3';
+        res.send([{ path: `${req.bucketUrl}${name}`, name }]);
+      }
     });
 });
 
