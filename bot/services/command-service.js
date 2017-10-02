@@ -1,6 +1,8 @@
 // import * as Discord from 'discord.js'; // For autocomplete
 // import * as UserService from './user-service.js';
 
+const CommandReader = require('./../helpers/command-reader');
+
 const Caixa2 = require('./caixa2-service.js');
 const helper = require('../helpers/command-helpers.js');
 
@@ -26,6 +28,7 @@ class CommandService {
     this.client = client;
     this.userService = userService;
 
+    this.commandReader = new CommandReader();
     this.caixa2Service = new Caixa2(client);
   }
 
@@ -37,19 +40,27 @@ class CommandService {
     let channel = message.channel;
     let splittedCommand = command.split(' ');
 
-    // Match group-less first
-    if (helper.commandMatches(splittedCommand[0], withoutGroup.PING)) {
-      channel.send('Rá toma no cu!');
-    }
-    if (helper.commandMatches(splittedCommand[0], groups.LIST_IDS)) {
-      this.listMemberIds(splittedCommand, message);
-    }
+    const actions = this.commandReader.actions();
+    let commandAction = this.commandReader.read(command, message);
 
-    // Match grouped commands
-    if (helper.commandMatches(splittedCommand[0], groups.LOUNGE)) {
+    if (commandAction != null) {
+      switch (commandAction.action) {
+        case actions.COMMAND_ERROR:
+          channel.send(commandAction.params.message);
+          break;
+        case actions.MUTE_MEMBER:
+          channel.send('A feature não está pronta ainda, culpem o Vitão!');
+          break;
+        default:
+          channel.send('Acho que não sei como atendê-lo :c');
+      }
+    } else if (helper.commandMatches(splittedCommand[0], withoutGroup.PING)) {
+      channel.send('Rá toma no cu!');
+    } else if (helper.commandMatches(splittedCommand[0], groups.LIST_IDS)) {
+      this.listMemberIds(splittedCommand, message);
+    } else if (helper.commandMatches(splittedCommand[0], groups.LOUNGE)) {
       this.loungeGroup(splittedCommand, message);
-    }
-    if (helper.commandMatches(splittedCommand[0], groups.CAIXA2)) {
+    } else if (helper.commandMatches(splittedCommand[0], groups.CAIXA2)) {
       this.caixa2(splittedCommand, message);
     }
   }
