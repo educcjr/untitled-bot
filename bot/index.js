@@ -1,18 +1,17 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-const appConfigs = require('./app-configs.js');
-const apiPath = 'http://127.0.0.1:5000';
+const appConfigs = require('./../app-configs.js');
 
 const RequestService = require('./../common/request-service');
 const resquestService = new RequestService();
 
 const UserService = require('./services/user-service.js');
-const userService = new UserService(apiPath);
+const userService = new UserService(appConfigs.API_PATH);
 const ReplyService = require('./services/reply-service.js');
 const replyService = new ReplyService();
 const VoiceService = require('./services/voice-service.js');
-const voiceService = new VoiceService(apiPath, resquestService);
+const voiceService = new VoiceService(appConfigs.API_PATH, resquestService);
 const CommandService = require('./services/command-service.js');
 const commandService = new CommandService(client, userService);
 

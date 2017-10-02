@@ -8,9 +8,9 @@ const Discord = require('discord.js');
 const Parser = require('../helpers/parser.js');
 
 const Datastore = require('@google-cloud/datastore');
-const gcpAuth = process.env.NODE_ENV === 'production' ? {} : {
+const gcpAuth = {
   projectId: 'untitled-bot-174418',
-  credentials: require('./../keyfile.json')
+  credentials: require('./../../keyfile.json')
 };
 const datastore = Datastore(gcpAuth);
 

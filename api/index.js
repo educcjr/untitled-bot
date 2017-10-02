@@ -3,12 +3,14 @@ const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
+const appConfigs = require('./../app-configs.js');
+
 const Datastore = require('@google-cloud/datastore');
 const Storage = require('@google-cloud/storage');
 
-const gcpAuth = process.env.NODE_ENV === 'production' ? {} : {
-  projectId: 'untitled-bot-174418',
-  credentials: require('./keyfile.json')
+const gcpAuth = {
+  projectId: appConfigs.GCP_PROJECTID,
+  credentials: require('./../keyfile.json')
 };
 const datastore = Datastore(gcpAuth);
 const storage = Storage(gcpAuth);
@@ -34,7 +36,10 @@ app.use('/user', userRouter);
 app.use('/odota', openDotaRouter);
 app.use('/greetings', greetingsRouter);
 
-const port = process.env.NODE_ENV === 'test' ? 5050 : 5000;
+const port = process.env.NODE_ENV === 'test'
+  ? appConfigs.API_TEST_PORT
+  : appConfigs.API_PORT;
+
 app.listen(port, () => {
   console.log('Api running on: ' + port);
   console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
