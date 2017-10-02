@@ -29,6 +29,8 @@ app.use((req, res, next) => {
   req.requestService = requestService;
   req.datastore = datastore;
   req.storage = storage;
+  req.bucket = storage.bucket(appConfigs.GCP_BUCKET);
+  req.bucketUrl = appConfigs.GCP_BUCKET_URL;
   next();
 });
 

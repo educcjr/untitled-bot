@@ -1,7 +1,5 @@
 import React from 'react';
 
-const audioBucket = 'https://storage.googleapis.com/untitled-bot-174418.appspot.com/greetings/';
-
 class AudioGreetings extends React.Component {
   constructor (props) {
     super(props);
@@ -51,17 +49,22 @@ class AudioGreetings extends React.Component {
     this.setState({uploadResponse: 'Enviando...'});
     this.props.greetingsService.post(this.state.userDiscordId, this.state.audioFile)
       .then(result => {
-        this.setState({
-          uploadResponse: result.filename
-            ? `Arquivo ${result.filename} enviado com sucesso.`
-            : result.message,
-          userAudioGreetings: [ result.filename, ...this.state.userAudioGreetings ]
-        });
+        if (result.name) {
+          this.setState({
+            uploadResponse: `Arquivo ${result.name} enviado com sucesso.`,
+            userAudioGreetings: [
+              { name: result.name, path: result.path },
+              ...this.state.userAudioGreetings
+            ]
+          });
+        } else {
+          this.setState({uploadResponse: result.message});
+        }
       });
   }
 
-  playAudio (name) {
-    let audio = new Audio(audioBucket + name);
+  playAudio (path) {
+    let audio = new Audio(path);
     audio.play();
   }
 
@@ -74,7 +77,9 @@ class AudioGreetings extends React.Component {
     this.props.greetingsService.delete(this.state.toDelete)
       .then(() => {
         this.setState({
-          userAudioGreetings: this.state.userAudioGreetings.filter(file => file !== this.state.toDelete)
+          userAudioGreetings: this.state.userAudioGreetings.filter(
+            file => file.name !== this.state.toDelete
+          )
         });
       });
     $('#deleteModal').modal('hide');
@@ -113,7 +118,7 @@ class AudioGreetings extends React.Component {
                     display: 'flex',
                     alignItems: 'center'
                   }}>
-                  <div onClick={() => this.playAudio(audio)}
+                  <div onClick={() => this.playAudio(audio.path)}
                     style={{
                       cursor: 'pointer',
                       minWidth: '50px',
@@ -121,12 +126,12 @@ class AudioGreetings extends React.Component {
                       borderRadius: '5px',
                       display: 'inline-block',
                       padding: '10px'
-                    }}>{audio}</div>
+                    }}>{audio.name}</div>
                   <button
                     style={{marginLeft: '10px', cursor: 'pointer'}}
                     type='button'
                     className='btn btn-danger'
-                    onClick={() => this.deleteConfirmation(audio)}
+                    onClick={() => this.deleteConfirmation(audio.name)}
                   >Delete</button>
                 </div>
               )}

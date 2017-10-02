@@ -3,18 +3,17 @@ const path = require('path');
 const express = require('express');
 const router = express.Router();
 
-const uploadDest = './../uploads/';
 const multer = require('multer');
 const uploadParser = multer({
   storage: multer.diskStorage({
-    destination: uploadDest,
+    destination: './../uploads/',
     filename: (req, file, cb) => {
       cb(null, Date.now() + path.extname(file.originalname));
     }
   })
 });
 
-const bucket = 'untitled-bot-174418.appspot.com';
+const greetingsPath = 'greetings/';
 
 router.get('/audio', (req, res, next) => {
   const query = req.datastore.createQuery('AudioGreeting');
@@ -35,8 +34,11 @@ router.get('/audio/:userId', (req, res, next) => {
 
   req.datastore
     .runQuery(query)
-    .then(results => {
-      res.send(results[0].map(audioGreeting => audioGreeting.name));
+    .then(([result, ...rest]) => {
+      res.send(result.map(audioGreeting => ({
+        path: `${req.bucketUrl}${greetingsPath}${audioGreeting.name}`,
+        name: audioGreeting.name
+      })));
     });
 });
 
@@ -45,9 +47,8 @@ router.post('/audio', uploadParser.single('file'), (req, res, next) => {
     return res.status(500).send({ message: 'Tipo de arquivo incorreto. Você está enviando um áudio?' });
   }
 
-  let uploadOptions = { destination: 'greetings/' + req.file.filename, public: true };
-  req.storage
-    .bucket(bucket)
+  let uploadOptions = { destination: `${greetingsPath}${req.file.filename}`, public: true };
+  req.bucket
     .upload(req.file.path, uploadOptions, (err, file) => {
       if (err) return res.status(500).send(err);
 
@@ -61,7 +62,10 @@ router.post('/audio', uploadParser.single('file'), (req, res, next) => {
         if (err) return res.status(500).send(err);
       });
 
-      res.send({ filename: req.file.filename });
+      res.send({
+        path: `${req.bucketUrl}${greetingsPath}${req.file.filename}`,
+        name: req.file.filename
+      });
     });
 });
 
