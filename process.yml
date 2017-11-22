@@ -1,5 +1,7 @@
 apps:
   - script: './api/index.js'
     name: 'api'
+    log_date_format : 'YYYY-MM-DD HH:mm Z'
   - script: './bot/index.js'
     name: 'bot'
+    log_date_format : 'YYYY-MM-DD HH:mm Z'

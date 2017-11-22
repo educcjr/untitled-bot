@@ -9,10 +9,7 @@ cp  ~/scripts/app-configs.js ~/untitled-bot/
 cp  ~/scripts/keyfile.json ~/untitled-bot/
 
 cd ~/untitled-bot
+
 npm install
-
-NODE_ENV=test
 npm test
-
-NODE_ENV=production
 npm start
