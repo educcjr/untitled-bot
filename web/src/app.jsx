@@ -2,7 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 
-import AudioGreetings from './audio-greetings';
+// Containers
+import AudioGreetings from './containers/audio-greetings';
+
+// Components
+import { Navbar } from './components/Navbar';
+
+// Pages
+import { HomePage } from './components/pages/Home';
 
 import UserService from './services/user-service';
 import GreetingsService from './services/greetings-service';
@@ -34,12 +41,8 @@ class App extends React.Component {
     return (
       <Router>
         <div className='container'>
-          <div style={{marginBottom: '20px'}}>
-            <Link to='/'>Home</Link> |
-            <Link to='/audio-greetings'>Audio greetings</Link>
-          </div>
-
-          <Route exact path='/' render={() => <h1>Untitled Bot Page</h1>} />
+          <Navbar />
+          <Route exact path='/' render={() => <HomePage />} />
           <Route path='/audio-greetings' render={() =>
             <AudioGreetings
               loadUsers={this.loadUsers}
