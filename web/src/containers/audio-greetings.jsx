@@ -6,6 +6,9 @@ import { AudioForm } from '../components/AudioForm';
 import { ExistingAudio } from '../components/ExistingAudio';
 import { DeleteModal } from '../components/DeleteModal';
 
+// Styles
+import { FormWrapper } from '../styles/layout/audioForm';
+
 class AudioGreetings extends React.Component {
   constructor (props) {
     super(props);
@@ -93,10 +96,8 @@ class AudioGreetings extends React.Component {
 
   render () {
     return (
-      <div>
-        <Header title="Audio Greetings" />
+      <FormWrapper>
         <div>
-
           {/* Audio Form Component - Start  */}
           <AudioForm
             onSubmit={this.onSubmit}
@@ -124,7 +125,7 @@ class AudioGreetings extends React.Component {
           deleteAudio={this.deleteAudio}
         />
         {/* Modal Component - End */}
-      </div>
+      </FormWrapper>
     );
   }
 }

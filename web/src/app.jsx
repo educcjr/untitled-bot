@@ -2,14 +2,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 
-// Containers
-import AudioGreetings from './containers/audio-greetings';
+// Styles
+import normalize from './styles/base/normalize';
+import reset from './styles/base/reset';
+import typography from './styles/base/typography';
 
-// Components
-import { Navbar } from './components/Navbar';
+// Containers
+// import AudioGreetings from './containers/audio-greetings';
 
 // Pages
 import { HomePage } from './components/pages/Home';
+import { GreetingsPage } from './components/pages/Greetings';
 
 import UserService from './services/user-service';
 import GreetingsService from './services/greetings-service';
@@ -40,14 +43,18 @@ class App extends React.Component {
   render () {
     return (
       <Router>
-        <div className='container'>
-          <Navbar />
+        <div>
           <Route exact path='/' render={() => <HomePage />} />
           <Route path='/audio-greetings' render={() =>
-            <AudioGreetings
-              loadUsers={this.loadUsers}
+            // <AudioGreetings
+            //   loadUsers={this.loadUsers}
+            //   users={this.state.users}
+            //   greetingsService={this.greetingsService} />
+            <GreetingsPage
               users={this.state.users}
-              greetingsService={this.greetingsService} />
+              loadUsers={this.loadUsers}
+              greetingsService={this.greetingsService}
+            />
           } />
         </div>
       </Router>

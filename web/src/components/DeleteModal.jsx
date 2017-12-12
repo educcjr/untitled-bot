@@ -1,8 +1,5 @@
 import React from 'react';
 
-/**
- * DeleteModal
- */
 export class DeleteModal extends React.Component {
   render() {
     const toDelete = this.props.toDelete,

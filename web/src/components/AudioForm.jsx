@@ -1,8 +1,13 @@
 import React from 'react';
 
-/**
- * AudioForm
- */
+// Styles
+import {
+  UntitledForm,
+  UntitledSelect,
+  UntitledOption,
+} from '../styles/layout/audioForm';
+import { FileUpload, FilePicker, Submit } from '../styles/layout/fileUpload';
+
 export class AudioForm extends React.Component {
   render() {
     const onSubmit = this.props.onSubmit,
@@ -12,35 +17,31 @@ export class AudioForm extends React.Component {
           onFileChange = this.props.onFileChange;
 
     return (
-      <form
-        style={{width: '300px', textOverflow: 'ellipsis'}}
-        onSubmit={onSubmit}>
-
-        <div className='form-group'>
-          <select
-            className='form-control'
+      <UntitledForm onSubmit={onSubmit}>
+        <div>
+          <UntitledSelect
             onChange={onUserChange}
             value={userDiscordId}>
             {users.map((user, index) => (
-              <option key={index} value={user.discordId}>{user.name}</option>
+              <UntitledOption key={index} value={user.discordId}>{user.name}</UntitledOption>
             ))}
-          </select>
+          </UntitledSelect>
         </div>
 
-        <div className='form-group'>
-          <input
-            className='form-control-file'
+        <div>
+          <FileUpload
             type='file'
             accept='audio/*'
             onChange={onFileChange}
-            style={{width: '100%'}} />
+          />
+          <FilePicker>Choose an audio</FilePicker>
         </div>
 
-        <div className='form-group'>
-          <input className='btn btn-primary' type='submit' />
+        <div>
+          <Submit type='submit' />
         </div>
 
-      </form>
+      </UntitledForm>
     );
   }
 }

@@ -31,7 +31,16 @@ module.exports = {
           use: ['css-loader']
         }) : [ 'style-loader', 'css-loader' ]
       },
-      { test: /\.(png|jpg)$/, use: 'url-loader?limit=10000&name=/images/[hash].[ext]' }
+      {
+        test: /\.(png|jpg|svg)$/,
+        loader: 'url-loader',
+        options: {
+          outputPath: 'images/',
+          name: '[hash].[ext]',
+          publicPath: '/',
+          limit: 10000
+        }
+      }
     ]
   },
   plugins: PROD ? [

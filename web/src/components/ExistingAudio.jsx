@@ -1,8 +1,15 @@
 import React from 'react';
+import {
+  AudioContainer,
+  ThirdHeader,
+  PlayList,
+  AudioGrid,
+  DeleteButton,
+  Audio
+} from '../styles/layout/audioList';
+import DeleteIcon from './icons/DeleteIcon';
+import '../styles/icons.css';
 
-/**
- * ExistingAudio
- */
 export class ExistingAudio extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     const userAudioGreetings = this.props.userAudioGreetings,
@@ -10,35 +17,19 @@ export class ExistingAudio extends React.Component { // eslint-disable-line reac
           deleteConfirmation = this.props.deleteConfirmation;
 
     return (
-      <div style={{paddingTop: '20px'}}>
-        <h3>Existing audios</h3>
-        <div style={{paddingTop: '10px'}}>
+      <AudioContainer>
+        <ThirdHeader>Current Greetings</ThirdHeader>
+        <PlayList>
           {userAudioGreetings.map((audio, index) =>
-            <div key={index}
-              style={{
-                marginBottom: '10px',
-                display: 'flex',
-                alignItems: 'center'
-              }}>
-              <div onClick={() => playAudio(audio.path)}
-                style={{
-                  cursor: 'pointer',
-                  minWidth: '50px',
-                  border: '1px solid #b1b1b1',
-                  borderRadius: '5px',
-                  display: 'inline-block',
-                  padding: '10px'
-                }}>{audio.name}</div>
-              <button
-                style={{marginLeft: '10px', cursor: 'pointer'}}
-                type='button'
-                className='btn btn-danger'
-                onClick={() => deleteConfirmation(audio.name)}
-              >Delete</button>
-            </div>
+            <AudioGrid key={index}>
+              <Audio onClick={() => playAudio(audio.path)}>{audio.name}</Audio>
+              <DeleteButton type='button' onClick={() => deleteConfirmation(audio.name)}>
+                <DeleteIcon/>
+              </DeleteButton>
+            </AudioGrid>
           )}
-        </div>
-      </div>
+        </PlayList>
+      </AudioContainer>
       );
       }
     }
