@@ -1,4 +1,6 @@
 import styled from 'styled-components';
+import { lightBlue } from '../base/variables';
+
 
 export const FormWrapper = styled.div`
   grid-column-start: 3;
@@ -6,7 +8,7 @@ export const FormWrapper = styled.div`
   background-color: #fff;
   width: 25vw;
   border-radius: 0.4rem;
-  border-bottom: 0.2rem solid rgba(102, 206, 217, 1);
+  border-bottom: 0.2rem solid ${lightBlue};
   @media (max-width: 1440px) {
     width: 26.5vw;
   }
@@ -41,7 +43,7 @@ export const UntitledSelect = styled.select`
   height: 5vh;
   outline: none;
   border: none;
-  border-bottom: 0.1rem solid rgba(102, 206, 217, 1);
+  border-bottom: 0.1rem solid ${lightBlue};
   font-weight: 300;
   margin-bottom: 1rem;
   position: relative;
