@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import normalize from './styles/base/normalize';
 import reset from './styles/base/reset';
 import typography from './styles/base/typography';
+import './styles/icons.css';
 
 // Containers
 // import AudioGreetings from './containers/audio-greetings';
