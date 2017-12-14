@@ -7,6 +7,24 @@
   top: 11.7rem;
   position: absolute;
 }
+@media (max-width: 768px) and (orientation: portrait) {
+  .un-logo {
+    top: 14.8rem;
+  }
+}
+
+@media (max-width: 425px) and (orientation: portrait) {
+  .un-logo {
+    width: 100%;
+    top: 9.8rem;
+  }
+}
+@media (max-width: 360px) and (orientation: portrait) {
+  .un-logo {
+    width: 100%;
+    top: 8rem;
+  }
+}
 
 .un-delete {
   fill: rgba(238, 110, 101,1);
