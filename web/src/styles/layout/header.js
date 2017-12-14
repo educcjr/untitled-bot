@@ -47,8 +47,27 @@ export const SecondTitle = styled.h2`
   text-transform: uppercase;
   grid-column-start: 3;
   margin-top: 4rem;
+  @media (max-width: 1440px) {
+    margin-bottom: 4rem;
+  }
+  @media (max-width: 1024px) {
+    grid-column-start: 2;
+    margin-bottom: 7rem;
+    font-size: 2em;
+    margin-left: 4rem;
+  }
+  @media (max-width: 768px) {
+    grid-column-start: 1;
+    margin-bottom: 3rem;
+    font-size: 2.5em;
+    margin-left: 0;
+  }
+  @media (max-width: 425px) and (orientation: portrait) {
+    margin-top: 1rem;
+    margin-bottom: 9rem;
+    grid-row-start: 2;
+  }
 `
-
 export const Logo = styled.div`
   grid-column-start: 2;
   background-repeat: no-repeat;

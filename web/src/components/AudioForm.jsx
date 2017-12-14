@@ -4,7 +4,6 @@ import React from 'react';
 import {
   UntitledForm,
   UntitledSelect,
-  UntitledOption,
 } from '../styles/layout/audioForm';
 import { FileUpload, FilePicker, Submit } from '../styles/layout/fileUpload';
 
@@ -23,7 +22,7 @@ export class AudioForm extends React.Component {
             onChange={onUserChange}
             value={userDiscordId}>
             {users.map((user, index) => (
-              <UntitledOption key={index} value={user.discordId}>{user.name}</UntitledOption>
+              <option key={index} value={user.discordId}>{user.name}</option>
             ))}
           </UntitledSelect>
         </div>

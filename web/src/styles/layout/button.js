@@ -8,6 +8,7 @@ export const UntitledNav = styled.nav`
     grid-column-start: 2;
     margin-top: 3rem;
     padding: 1rem 3rem;
+    margin-left: 1rem;
   }
   @media (max-width: 768px) and (orientation: portrait) {
     grid-column-start: 1;
@@ -25,12 +26,15 @@ export const Button = styled(Link)`
   font-size: 1em;
   font-weight: 700;
   background-color: rgba(102, 206, 217, 1);
-  margin-left: ${props => props.home ? 0 : 1 + "rem"};
+  margin-top: ${props => props.home ? 2 + "rem" : 0};
   padding: 1rem 3rem;
   border-radius: 0.4rem;
   border-bottom: 4px solid rgba(31, 101, 108, 1);
   box-shadow: 0 3px 10px 2px rgba(0, 0, 0, 0.5);
   transition: all .3s ease-in-out;
+  &:last-child{
+    margin-left: ${props => props.home ? 0 : 1 + "rem"};
+  }
   &:hover{
     text-decoration: none;
     color: #fff;
@@ -41,18 +45,25 @@ export const Button = styled(Link)`
   @media (max-width: 1024px) {
     font-size: 0.8em;
     padding: 1rem 2rem;
+    grid-column-start: ${props => props.home ? 2 : 3};
+    &:last-child {
+      margin-left: ${props => props.home ? 4 + "rem" : 2 + "rem"};
+    }
   }
   @media (max-width: 768px) and (orientation: portrait) {
     font-size: 1em;
+    grid-column-start: ${props => props.home ? 1 : 1};
     &:last-child{
       margin-left: ${props => props.home ? 0 : 2.2 + "rem"};
     }
-    @media (max-width: 375px) and (orientation: portrait) {
-      font-size: 0.8em;
-      &:last-child{
-        margin-left: ${props => props.home ? 0 : 1.5 + "rem"};
-      }
+  }
+  @media (max-width: 425px) and (orientation: portrait) {
+    grid-row-start: ${props => props.home ? 2 : 3};
+  }
+  @media (max-width: 375px) and (orientation: portrait) {
+    font-size: 0.8em;
+    &:last-child{
+      margin-left: ${props => props.home ? 0 : 1.5 + "rem"};
     }
-
   }
 `
