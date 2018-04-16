@@ -6,11 +6,11 @@
   "scripts": {
     "build": "webpack -p",
     "start": "pm2 startOrRestart process.yml",
-    "dev": "concurrently -k \"node ./bot/index.js\" \"node ./api/index.js\" \"webpack-dev-server\"",
-    "devbot": "concurrently -k \"node ./bot/index.js\" \"node ./api/index.js\"",
+    "dev": "concurrently -k \"nodemon ./bot/index.js\" \"nodemon ./api/index.js\" \"webpack-dev-server\"",
+    "devbot": "concurrently -k \"nodemon ./bot/index.js\" \"nodemon ./api/index.js\"",
     "devbotbrk": "concurrently -k \"node --inspect-brk ./bot/index.js\" \"node ./api/index.js\"",
-    "devui": "concurrently -k \"node ./api/index.js\" \"webpack-dev-server\"",
-    "devapi": "node ./api/index.js",
+    "devui": "concurrently -k \"nodemon ./api/index.js\" \"webpack-dev-server\"",
+    "devapi": "nodemon ./api/index.js",
     "test": "mocha"
   },
   "author": "",
@@ -59,6 +59,7 @@
   },
   "devDependencies": {
     "concurrently": "^3.5.0",
+    "nodemon": "^1.17.3",
     "semistandard": "^11.0.0"
   },
   "semistandard": {

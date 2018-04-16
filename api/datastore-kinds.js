@@ -1,7 +1,5 @@
-module.exports = process.env.NODE_ENV === 'test' ? {
-  USER: 'UserTESTKIND',
-  AUDIO_GREETING: 'AudioGreetingTESTKIND'
-} : {
+module.exports = {
   USER: 'User',
-  AUDIO_GREETING: 'AudioGreeting'
+  AUDIO_GREETING: 'AudioGreeting',
+  VOICE_MUTE: 'VoiceMute'
 };

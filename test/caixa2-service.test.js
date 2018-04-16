@@ -1,5 +1,3 @@
-process.env.NODE_ENV = 'test';
-
 const Caixa2 = require('../bot/services/caixa2-service.js');
 const assert = require('assert');
 

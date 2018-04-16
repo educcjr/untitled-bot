@@ -4,7 +4,7 @@ const ACTIONS = {
 };
 
 const COMMANDS = {
-  VOTE_MUTE: 'mute'
+  VOTE_MUTE: 'vote_mute'
 };
 
 class CommandReader {

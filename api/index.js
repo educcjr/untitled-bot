@@ -19,9 +19,15 @@ const datastoreKinds = require('./datastore-kinds');
 const RequestService = require('./../common/request-service');
 const requestService = new RequestService();
 
+const VoiceMuteRepository = require('./repository/voice-mute-repository');
+const voiceMuteRepository = new VoiceMuteRepository(datastore);
+
 const openDotaRouter = require('./routers/open-dota-router');
 const userRouter = require('./routers/user-router');
 const greetingsRouter = require('./routers/greetings-router');
+const VoteMuteRouter = require('./routers/vote-mute-router');
+
+const voteMuteRouter = new VoteMuteRouter(voiceMuteRepository);
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -39,6 +45,7 @@ app.use((req, res, next) => {
 app.use('/user', userRouter);
 app.use('/odota', openDotaRouter);
 app.use('/greetings', greetingsRouter);
+app.use('/mute', voteMuteRouter.router());
 
 const port = process.env.NODE_ENV === 'test'
   ? appConfigs.API_TEST_PORT
