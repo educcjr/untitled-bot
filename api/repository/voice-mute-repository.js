@@ -2,7 +2,7 @@ const DatastoreHelper = require('./datastore-helper');
 
 class VoiceMuteRepository {
   constructor (datastore) {
-    this.datastoreHelper = new DatastoreHelper(DatastoreHelper.VOICE_MUTE, datastore);
+    this.datastoreHelper = new DatastoreHelper(DatastoreHelper.kinds.VOICE_MUTE, datastore);
   }
 
   find (requestedDateTime) {

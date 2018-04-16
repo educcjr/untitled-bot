@@ -18,15 +18,19 @@ class VoteMuteRouter {
         let vote = { discordId: voterDiscordId, dateTime: dateTimeIndex };
 
         if (votation != null) {
-          if (votation.votes.find(vote => vote.discordId === voterDiscordId) != null) {
+          if (votation.votes.find(vote => vote.discordId === voterDiscordId) == null) {
             let voteResult = await this.voiceMuteRepository.vote(votation, vote);
+
             if (voteResult.success) {
               return res.send({ message: 'Seu voto foi contabilizado!' });
             }
+          } else {
+            return res.send({ message: 'Você já votou!' });
           }
         } else {
           let creationResult =
             await this.voiceMuteRepository.create(candidateDiscordId, dateTimeIndex, vote);
+
           if (creationResult.success) {
             return res.send({ message: 'A votação foi iniciada!' });
           }

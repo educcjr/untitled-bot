@@ -11,7 +11,7 @@ class DatastoreHelper {
       let allocationResult = await this.datastore.allocateIds(this.datastore.key(this.kind), 1);
       let keyList = allocationResult[0];
       let key = keyList[0];
-      await this.datastore.insert({key, data});
+      await this.datastore.insert({ key, data });
       result = successResult(key);
     } catch (err) {
       result = errorResult(err);
@@ -25,7 +25,7 @@ class DatastoreHelper {
 
     try {
       let key = entity[this.datastore.KEY];
-      await this.datastore.update({key, entity});
+      await this.datastore.update({ key, data: entity });
       result = successResult(key);
     } catch (err) {
       result = errorResult(err);
