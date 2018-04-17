@@ -19,7 +19,7 @@ const datastoreKinds = require('./datastore-kinds');
 const RequestService = require('./../common/request-service');
 const requestService = new RequestService();
 
-const VoiceMuteRepository = require('./repository/voice-mute-repository');
+const VoiceMuteRepository = require('./repositories/voice-mute-repository');
 const voiceMuteRepository = new VoiceMuteRepository(datastore);
 
 const openDotaRouter = require('./routers/open-dota-router');
@@ -39,6 +39,9 @@ app.use((req, res, next) => {
   req.storage = storage;
   req.bucket = storage.bucket(appConfigs.GCP_BUCKET);
   req.bucketUrl = appConfigs.GCP_BUCKET_URL;
+  res.sendError = (err, status = 500) => {
+    res.status(status).send({ message: err.message, stack: err.stack });
+  };
   next();
 });
 
