@@ -1,21 +1,22 @@
 const express = require('express');
-const router = express.Router();
 
 const VoteMuteService = require('./../services/vote-mute-service');
 
 class VoteMuteRouter {
   constructor (voiceMuteRepository, userRepository) {
-    this.service = new VoteMuteService(voiceMuteRepository, userRepository);
+    this.voteMuteService = new VoteMuteService(voiceMuteRepository, userRepository);
   }
 
   router () {
+    const router = express.Router();
+
     router.post('/', async (req, res) => {
       try {
         let { candidateDiscordId, voterDiscordId, dateTimeIndex } = req.body;
 
-        let result = await this.service.vote(candidateDiscordId, voterDiscordId, dateTimeIndex);
+        let voteResult = await this.voteMuteService.vote(candidateDiscordId, voterDiscordId, dateTimeIndex);
 
-        return res.send(result);
+        return res.send(voteResult);
       } catch (err) {
         return res.sendError(err);
       }

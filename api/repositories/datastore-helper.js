@@ -6,17 +6,27 @@ class DatastoreHelper {
 
   async insert (data) {
     let allocationResult = await this.datastore.allocateIds(this.datastore.key(this.kind), 1);
-
     let keyList = allocationResult[0];
     let key = keyList[0];
+
     await this.datastore.insert({ key, data });
 
-    return key;
+    data[this.datastore.KEY] = key;
+    return data;
   }
 
   async update (entity) {
+    await this.datastore.update({
+      key: entity[this.datastore.KEY],
+      data: entity
+    });
+
+    return entity;
+  }
+
+  async delete (entity) {
     let key = entity[this.datastore.KEY];
-    await this.datastore.update({ key, data: entity });
+    await this.datastore.delete(key);
     return key;
   }
 
@@ -26,7 +36,12 @@ class DatastoreHelper {
 
   async runQuery (query) {
     let queryResult = await this.datastore.runQuery(query);
-    return queryResult[0];
+    let entities = queryResult[0];
+    return entities;
+  }
+
+  getAll () {
+    return this.runQuery(this.query());
   }
 }
 

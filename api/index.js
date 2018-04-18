@@ -14,19 +14,22 @@ const gcpAuth = {
 };
 const datastore = Datastore(gcpAuth);
 const storage = Storage(gcpAuth);
-const datastoreKinds = require('./datastore-kinds');
 
 const RequestService = require('./../common/request-service');
 const requestService = new RequestService();
 
+const UserRepository = require('./repositories/user-repository');
 const VoiceMuteRepository = require('./repositories/voice-mute-repository');
+
+const userRepository = new UserRepository(datastore);
 const voiceMuteRepository = new VoiceMuteRepository(datastore);
 
 const openDotaRouter = require('./routers/open-dota-router');
-const userRouter = require('./routers/user-router');
+const UserRouter = require('./routers/user-router');
 const greetingsRouter = require('./routers/greetings-router');
 const VoteMuteRouter = require('./routers/vote-mute-router');
 
+const userRouter = new UserRouter(userRepository);
 const voteMuteRouter = new VoteMuteRouter(voiceMuteRepository);
 
 app.use(cors());
@@ -35,7 +38,6 @@ app.use(bodyParser.json());
 app.use((req, res, next) => {
   req.requestService = requestService;
   req.datastore = datastore;
-  req.datastoreKinds = datastoreKinds;
   req.storage = storage;
   req.bucket = storage.bucket(appConfigs.GCP_BUCKET);
   req.bucketUrl = appConfigs.GCP_BUCKET_URL;
@@ -45,7 +47,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/user', userRouter);
+app.use('/user', userRouter.router());
 app.use('/odota', openDotaRouter);
 app.use('/greetings', greetingsRouter);
 app.use('/mute', voteMuteRouter.router());

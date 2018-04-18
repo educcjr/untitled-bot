@@ -14,22 +14,19 @@ class VoiceMuteRepository {
     return this.datastoreHelper.runQuery(query);
   }
 
-  async create (candidateDiscordId, startedDateTime, vote) {
-    let votation = {
+  create (candidateDiscordId, startedDateTime, vote) {
+    return this.datastoreHelper.insert({
       candidateDiscordId,
       startedDateTime,
       votes: [ vote ]
-    };
-
-    await this.datastoreHelper.insert(votation);
-
-    return votation;
+    });
   }
 
-  async vote (votationEntity, vote) {
-    let votation = { ...votationEntity, votes: [ ...votationEntity.votes, vote ] };
-    await this.datastoreHelper.update(votation);
-    return votation;
+  vote (votationEntity, vote) {
+    return this.datastoreHelper.update({
+      ...votationEntity,
+      votes: [ ...votationEntity.votes, vote ]
+    });
   }
 }
 

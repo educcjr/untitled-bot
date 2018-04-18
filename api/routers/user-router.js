@@ -1,68 +1,51 @@
 const express = require('express');
-const router = express.Router();
 
-router.post('/', (req, res) => {
-  if (!req.body.id || !req.body.name) {
-    return res
-      .status(500)
-      .send({ errorMessage: 'Nome do usuário ou discordId não foi enviado.' });
+const UserService = require('./../services/user-service');
+
+class UserRouter {
+  constructor (userRepository) {
+    this.userService = new UserService(userRepository);
   }
 
-  let entity = {
-    key: req.datastore.key(req.datastoreKinds.USER),
-    data: {
-      discordId: req.body.id,
-      name: req.body.name
-    }
-  };
+  router () {
+    const router = express.Router();
 
-  let query = req.datastore
-    .createQuery(req.datastoreKinds.USER)
-    .filter('discordId', entity.data.discordId);
+    router.post('/', async (req, res) => {
+      try {
+        let { id: discordId, name } = req.body;
 
-  req.datastore.runQuery(query, (err, entities) => {
-    if (err) return res.status(500).send(datastoreErr(err));
-    if (entities.length > 1) {
-      return res
-        .status(500)
-        .send({
-          errorMessage: 'Existem usuários duplicados no banco de dados.'
-        });
-    }
+        if (!discordId || !name) {
+          throw new Error('Nome do usuário ou discordId não foi enviado.');
+        }
 
-    let isNew = true;
-    if (entities.length === 1) {
-      entity.key = entities[0][req.datastore.KEY];
-      isNew = false;
-    }
+        let createOrUpdateResult = await this.userService.createOrUpdate(discordId, name);
 
-    req.datastore.save(entity, (err) => {
-      if (err) return res.status(500).send(datastoreErr(err));
-      res.send({ user: entity, isNew });
+        return res.send(createOrUpdateResult);
+      } catch (err) {
+        return res.sendError(err);
+      }
     });
-  });
-});
 
-router.get('/', (req, res) => {
-  let query = req.datastore.createQuery(req.datastoreKinds.USER);
-  req.datastore.runQuery(query, (err, entities) => {
-    if (err) return res.status(500).send(datastoreErr(err));
-    res.send(entities);
-  });
-});
+    router.get('/', async (req, res) => {
+      try {
+        let users = await this.userService.getAll();
+        return res.send(users);
+      } catch (err) {
+        return res.sendError(err);
+      }
+    });
 
-router.delete('/:id', (req, res) => {
-  req.datastore.delete(req.datastore.key([req.datastoreKinds.USER, req.datastore.int(req.params.id)]), (err, apiResponse) => {
-    if (err) return req.status(500).send(datastoreErr(err));
-    res.send({ key: req.params.id });
-  });
-});
+    router.delete('/:id', async (req, res) => {
+      try {
+        let key = await this.userService.delete(req.params.id);
+        return res.send(key);
+      } catch (err) {
+        return res.sendError(err);
+      }
+    });
 
-const datastoreErr = (err) => {
-  return {
-    errorMessage: 'Houve algum problema com o Datastore.',
-    errorDetails: err
-  };
-};
+    return router;
+  }
+}
 
-module.exports = router;
+module.exports = UserRouter;

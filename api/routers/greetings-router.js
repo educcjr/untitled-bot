@@ -13,10 +13,11 @@ const uploadParser = multer({
   })
 });
 
-const greetingsPath = 'greetings/';
+const AUDIO_GREETING = 'AudioGreeting';
+const GREETINGS_PATH = 'greetings/';
 
 router.get('/audio', (req, res, next) => {
-  const query = req.datastore.createQuery(req.datastoreKinds.AUDIO_GREETING);
+  const query = req.datastore.createQuery(AUDIO_GREETING);
 
   req.datastore
     .runQuery(query)
@@ -29,7 +30,7 @@ router.get('/audio/:userId', (req, res, next) => {
   }
 
   const query = req.datastore
-    .createQuery(req.datastoreKinds.AUDIO_GREETING)
+    .createQuery(AUDIO_GREETING)
     .filter('discordId', req.params.userId);
 
   req.datastore
@@ -37,7 +38,7 @@ router.get('/audio/:userId', (req, res, next) => {
     .then(([result, ...rest]) => {
       if (result.length > 0) {
         res.send(result.map(audioGreeting => ({
-          path: `${req.bucketUrl}${greetingsPath}${audioGreeting.name}`,
+          path: `${req.bucketUrl}${GREETINGS_PATH}${audioGreeting.name}`,
           name: audioGreeting.name
         })));
       } else {
@@ -52,13 +53,13 @@ router.post('/audio', uploadParser.single('file'), (req, res, next) => {
     return res.status(500).send({ message: 'Tipo de arquivo incorreto. Você está enviando um áudio?' });
   }
 
-  let uploadOptions = { destination: `${greetingsPath}${req.file.filename}`, public: true };
+  let uploadOptions = { destination: `${GREETINGS_PATH}${req.file.filename}`, public: true };
   req.bucket
     .upload(req.file.path, uploadOptions, (err, file) => {
       if (err) return res.status(500).send(err);
 
       req.datastore.save({
-        key: req.datastore.key(req.datastoreKinds.AUDIO_GREETING),
+        key: req.datastore.key(AUDIO_GREETING),
         data: {
           discordId: req.body.id,
           name: req.file.filename
@@ -68,7 +69,7 @@ router.post('/audio', uploadParser.single('file'), (req, res, next) => {
       });
 
       res.send({
-        path: `${req.bucketUrl}${greetingsPath}${req.file.filename}`,
+        path: `${req.bucketUrl}${GREETINGS_PATH}${req.file.filename}`,
         name: req.file.filename
       });
     });
@@ -76,7 +77,7 @@ router.post('/audio', uploadParser.single('file'), (req, res, next) => {
 
 router.delete('/audio', (req, res, next) => {
   let query = req.datastore
-    .createQuery(req.datastoreKinds.AUDIO_GREETING)
+    .createQuery(AUDIO_GREETING)
     .filter('name', req.body.fileName);
 
   req.datastore
