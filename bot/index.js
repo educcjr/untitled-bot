@@ -3,9 +3,6 @@ const client = new Discord.Client();
 
 const appConfigs = require('./../app-configs.js');
 
-const RequestService = require('./../common/request-service');
-const resquestService = new RequestService();
-
 const UserService = require('./services/user-service.js');
 const ReplyService = require('./services/reply-service.js');
 const VoiceService = require('./services/voice-service.js');
@@ -18,7 +15,7 @@ client.on('ready', () => {
 
   const userService = new UserService(appConfigs.API_PATH);
   const replyService = new ReplyService();
-  const voiceService = new VoiceService(appConfigs.API_PATH, resquestService);
+  const voiceService = new VoiceService(appConfigs.API_PATH);
   const commandService = new CommandService(client, userService);
 
   console.log('I am ready!');

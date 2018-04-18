@@ -15,9 +15,6 @@ const gcpAuth = {
 const datastore = Datastore(gcpAuth);
 const storage = Storage(gcpAuth);
 
-const RequestService = require('./../common/request-service');
-const requestService = new RequestService();
-
 const UserRepository = require('./repositories/user-repository');
 const VoiceMuteRepository = require('./repositories/voice-mute-repository');
 
@@ -36,7 +33,6 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
-  req.requestService = requestService;
   req.datastore = datastore;
   req.storage = storage;
   req.bucket = storage.bucket(appConfigs.GCP_BUCKET);

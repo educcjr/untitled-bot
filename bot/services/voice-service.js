@@ -1,7 +1,8 @@
+const requestHelper = require('./../../common/request-helper');
+
 class VoiceService {
-  constructor (apiPath, requestService) {
+  constructor (apiPath) {
     this.apiPath = apiPath;
-    this.requestService = requestService;
     this.streaming = false;
   }
   isStreaming () {
@@ -13,7 +14,7 @@ class VoiceService {
       .join()
       .then(conn => {
         this.streaming = true;
-        this.requestService.get(`${this.apiPath}/greetings/audio/${member.user.id}`)
+        requestHelper.get(`${this.apiPath}/greetings/audio/${member.user.id}`)
           .then(audios => {
             const audioIndex = this.getRandomInt(1, audios.length) - 1;
             this.playAudio(audios[audioIndex].path, conn);

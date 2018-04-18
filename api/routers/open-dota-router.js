@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 
+const requestHelper = require('./../../common/request-helper');
+
 const apiPath = 'https://api.opendota.com/api';
 
 router.get('/:accountId/mean/kda', (req, res) => {
@@ -9,7 +11,7 @@ router.get('/:accountId/mean/kda', (req, res) => {
   let urlParams = `?${date}`;
   urlParams = urlParams.length > 1 ? urlParams : '';
 
-  req.requestService.get(`${apiPath}/players/${req.params.accountId}/histograms/kda${urlParams}`)
+  requestHelper.get(`${apiPath}/players/${req.params.accountId}/histograms/kda${urlParams}`)
     .then(result => {
       result = result.filter(r => r.games > 0);
       let sum = 0;

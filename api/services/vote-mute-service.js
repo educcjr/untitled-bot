@@ -3,9 +3,8 @@ const moment = require('moment');
 const DATE_TIME_FORMAT = 'YYYYMMDDHHmmss';
 
 class VoteMuteService {
-  constructor (voiceMuteRepository, userRepository) {
+  constructor (voiceMuteRepository) {
     this.voiceMuteRepository = voiceMuteRepository;
-    this.userRepository = userRepository;
   }
 
   async vote (candidateDiscordId, voterDiscordId, dateTimeIndex) {
