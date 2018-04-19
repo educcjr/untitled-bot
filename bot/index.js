@@ -1,12 +1,12 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-const appConfigs = require('./../app-configs.js');
+const appConfigs = require('./../app-configs');
 
-const UserService = require('./services/user-service.js');
-const ReplyService = require('./services/reply-service.js');
-const VoiceService = require('./services/voice-service.js');
-const CommandService = require('./services/command-service.js');
+const UserService = require('./remote-services/user-service');
+const ReplyService = require('./services/reply-service');
+const VoiceService = require('./services/voice-service');
+const CommandService = require('./services/command-service');
 
 const defaultChannelName = 'chatuba-em-texto';
 

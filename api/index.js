@@ -8,6 +8,14 @@ const appConfigs = require('./../app-configs');
 const Datastore = require('@google-cloud/datastore');
 const Storage = require('@google-cloud/storage');
 
+const UserRepository = require('./repositories/user-repository');
+const VoiceMuteRepository = require('./repositories/voice-mute-repository');
+
+const openDotaRouter = require('./routers/open-dota-router');
+const UserRouter = require('./routers/user-router');
+const greetingsRouter = require('./routers/greetings-router');
+const VoteMuteRouter = require('./routers/vote-mute-router');
+
 const gcpAuth = {
   projectId: appConfigs.GCP_PROJECTID,
   credentials: require('./../keyfile.json')
@@ -15,16 +23,8 @@ const gcpAuth = {
 const datastore = Datastore(gcpAuth);
 const storage = Storage(gcpAuth);
 
-const UserRepository = require('./repositories/user-repository');
-const VoiceMuteRepository = require('./repositories/voice-mute-repository');
-
 const userRepository = new UserRepository(datastore);
 const voiceMuteRepository = new VoiceMuteRepository(datastore);
-
-const openDotaRouter = require('./routers/open-dota-router');
-const UserRouter = require('./routers/user-router');
-const greetingsRouter = require('./routers/greetings-router');
-const VoteMuteRouter = require('./routers/vote-mute-router');
 
 const userRouter = new UserRouter(userRepository);
 const voteMuteRouter = new VoteMuteRouter(voiceMuteRepository);

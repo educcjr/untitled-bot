@@ -121,10 +121,10 @@ class CommandService {
           .replace('!', '');
         let user = this.client.users.get(id);
         if (user) {
-          this.userService.add({id: user.id, name: user.username})
+          this.userService.create(user.id, user.username)
             .then(result => {
-              if (result && result.data) {
-                channel.send('Usuário inserido: ```' + JSON.stringify(result.data) + '```');
+              if (result) {
+                channel.send(`Usuário ${result.isNew ? 'inserido' : 'alterado'}: \`\`\` ${JSON.stringify(result.user)} \`\`\``);
               }
             })
             .catch(err => defaultCatch(err, channel));
@@ -136,9 +136,11 @@ class CommandService {
         this.userService.list()
           .then(result => {
             if (result) {
+              let userList = '';
               for (let user of result) {
-                channel.send(user.name);
+                userList = `${userList}, ${user.name}`;
               }
+              channel.send(userList.substr(2));
             }
           })
           .catch(err => defaultCatch(err, channel));
