@@ -24,9 +24,10 @@ class CommandService {
    * @param {Discord.Client} client
    * @param {UserService} userService
    */
-  constructor (client, userService) {
+  constructor (client, userService, voteMuteService) {
     this.client = client;
     this.userService = userService;
+    this.voteMuteService = voteMuteService;
 
     this.commandReader = new CommandReader();
     this.caixa2Service = new Caixa2(client);
@@ -36,7 +37,7 @@ class CommandService {
    * @param {string} command
    * @param {Discord.Message} message
    */
-  execute (command, message) {
+  async execute (command, message) {
     let channel = message.channel;
     let splittedCommand = command.split(' ');
 
@@ -44,12 +45,18 @@ class CommandService {
     let commandAction = this.commandReader.read(command, message);
 
     if (commandAction != null) {
-      switch (commandAction.action) {
+      let { action, params } = commandAction;
+      switch (action) {
         case actions.COMMAND_ERROR:
-          channel.send(commandAction.params.message);
+          channel.send(params.message);
           break;
         case actions.MUTE_MEMBER:
-          channel.send('A feature não está pronta ainda, culpem o Vitão!');
+          channel.send(await this.voteMuteService.vote(
+            params.voter,
+            params.candidate,
+            params.voiceChannel,
+            params.textChannel
+          ));
           break;
         default:
           channel.send('Acho que não sei como atendê-lo :c');
