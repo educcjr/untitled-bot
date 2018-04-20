@@ -3,7 +3,7 @@ const client = new Discord.Client();
 
 const appConfigs = require('./../app-configs');
 
-const UserService = require('./remote-services/user-service');
+const UserRestService = require('./rest-services/user-rest-service');
 const ReplyService = require('./services/reply-service');
 const VoiceService = require('./services/voice-service');
 const VoteMuteService = require('./services/vote-mute-service');
@@ -16,15 +16,14 @@ client.on('ready', () => {
 
   // TODO: multiple guilds
   let defaultGuild = client.guilds.first();
-
   const defaultChannel = getDefaultChannel(defaultGuild);
 
-  const userRemoteService = new UserService(appConfigs.API_PATH);
+  const userRestService = new UserRestService(appConfigs.API_PATH);
 
   const replyService = new ReplyService();
   const voiceService = new VoiceService(appConfigs.API_PATH);
   const voteMuteService = new VoteMuteService(appConfigs.API_PATH);
-  const commandService = new CommandService(client, userRemoteService, voteMuteService);
+  const commandService = new CommandService(client, userRestService, voteMuteService);
 
   console.log('I am ready!');
   console.log(`Default channel: ${defaultChannel.id}`);
