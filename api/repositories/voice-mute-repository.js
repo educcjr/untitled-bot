@@ -14,9 +14,10 @@ class VoiceMuteRepository {
     return this.datastoreHelper.runQuery(query);
   }
 
-  create (candidateDiscordId, startedDateTime, vote) {
+  create (candidateDiscordId, channelDiscordId, startedDateTime, vote) {
     return this.datastoreHelper.insert({
       candidateDiscordId,
+      channelDiscordId,
       startedDateTime,
       votes: [ vote ]
     });

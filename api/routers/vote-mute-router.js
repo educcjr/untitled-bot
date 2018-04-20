@@ -12,9 +12,14 @@ class VoteMuteRouter {
 
     router.post('/', async (req, res) => {
       try {
-        let { candidateDiscordId, voterDiscordId, dateTimeIndex } = req.body;
+        let { candidateDiscordId, voterDiscordId, channelDiscordId, dateTimeIndex } = req.body;
 
-        let voteResult = await this.voteMuteService.vote(candidateDiscordId, voterDiscordId, dateTimeIndex);
+        let voteResult = await this.voteMuteService.vote(
+          candidateDiscordId,
+          voterDiscordId,
+          channelDiscordId,
+          dateTimeIndex
+        );
 
         return res.send(voteResult);
       } catch (err) {

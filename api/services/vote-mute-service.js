@@ -7,7 +7,7 @@ class VoteMuteService {
     this.voiceMuteRepository = voiceMuteRepository;
   }
 
-  async vote (candidateDiscordId, voterDiscordId, dateTimeIndex) {
+  async vote (candidateDiscordId, voterDiscordId, channelDiscordId, dateTimeIndex) {
     let result = { created: false, voted: false, votation: {} };
 
     let initialDateTime = parseInt(
@@ -16,21 +16,27 @@ class VoteMuteService {
         .format(DATE_TIME_FORMAT)
     );
 
-    let votationList = await this.voiceMuteRepository.find(initialDateTime, dateTimeIndex);
-    let votation = votationList.reverse().find(v => v.candidateDiscordId === candidateDiscordId);
+    let votation = (await this.voiceMuteRepository.find(initialDateTime, dateTimeIndex))
+      .reverse()
+      .filter(votation => votation.channelDiscordId === channelDiscordId)
+      .find(votation => votation.candidateDiscordId === candidateDiscordId);
+
     let vote = { discordId: voterDiscordId, dateTime: dateTimeIndex };
 
     if (votation != null) {
-      let didVoterAlreadyVote = votation.votes.find(vote => vote.discordId === voterDiscordId) != null;
-
-      if (!didVoterAlreadyVote) {
+      if (votation.votes.find(vote => vote.discordId === voterDiscordId) == null) {
         votation = await this.voiceMuteRepository.vote(votation, vote);
         result.voted = true;
       } else {
         result.voted = false;
       }
     } else {
-      votation = await this.voiceMuteRepository.create(candidateDiscordId, dateTimeIndex, vote);
+      votation = await this.voiceMuteRepository.create(
+        candidateDiscordId,
+        channelDiscordId,
+        dateTimeIndex,
+        vote
+      );
       result.created = true;
       result.voted = true;
     }
