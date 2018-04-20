@@ -21,7 +21,7 @@ jobs:
 
       - add_ssh_keys:
           fingerprints:
-            - "0b:e9:9d:57:1c:8a:82:ab:92:d4:cf:56:b2:d1:3f:5f"
+            - "07:d7:a2:e6:44:68:c5:49:7d:28:0d:29:19:b4:53:85"
 
       - deploy:
           name: gce deploy
