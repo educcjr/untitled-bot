@@ -8,7 +8,7 @@ class VoteMuteService {
   }
 
   async vote (candidateDiscordId, voterDiscordId, channelDiscordId, dateTimeIndex) {
-    let result = { created: false, voted: false, votation: {} };
+    let result = { created: false, voted: false, onGoing: false, votation: {} };
 
     let initialDateTime = parseInt(
       moment(dateTimeIndex, DATE_TIME_FORMAT)
@@ -16,10 +16,13 @@ class VoteMuteService {
         .format(DATE_TIME_FORMAT)
     );
 
-    let votation = (await this.voiceMuteRepository.find(initialDateTime, dateTimeIndex))
-      .reverse()
-      .filter(votation => votation.channelDiscordId === channelDiscordId)
-      .find(votation => votation.candidateDiscordId === candidateDiscordId);
+    let votation = await this.voiceMuteRepository.find(initialDateTime, dateTimeIndex, channelDiscordId, candidateDiscordId);
+
+    if (votation != null && votation.closed) {
+      result.onGoing = true;
+      result.votation = votation;
+      return result;
+    }
 
     let vote = { discordId: voterDiscordId, dateTime: dateTimeIndex };
 
@@ -43,6 +46,14 @@ class VoteMuteService {
 
     result.votation = votation;
     return result;
+  }
+
+  async closeVotation (candidateDiscordId, channelDiscordId, dateTimeIndex) {
+    return this.voiceMuteRepository.closeVotation(candidateDiscordId, channelDiscordId, dateTimeIndex);
+  }
+
+  async completeMute (candidateDiscordId, channelDiscordId, dateTimeIndex) {
+    return this.voiceMuteRepository.completeMute(candidateDiscordId, channelDiscordId, dateTimeIndex);
   }
 }
 

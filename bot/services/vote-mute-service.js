@@ -21,8 +21,12 @@ class VoteMuteService {
 
     let voteResult = await requestHelper.post(
       this.voteMuteRestServiceUrl,
-      this.createVote(candidate, voter, voiceChannel)
+      this.createVoteRequest(candidate, voter, voiceChannel)
     );
+
+    if (voteResult.onGoing) {
+      return `O ${candidate.displayName} já está mutado!`;
+    }
 
     if (voteResult.created && voteResult.voted) {
       return 'Votação iniciada!';
@@ -31,6 +35,11 @@ class VoteMuteService {
       let votesTotal = voteResult.votation.votes.length;
 
       if (votesTotal >= votesNeeded) {
+        await requestHelper.post(
+          `${this.voteMuteRestServiceUrl}/close`,
+          this.createVotationRequest(voteResult.votation)
+        );
+
         let permissionOverwrites = voiceChannel.permissionOverwrites.get(candidate.id);
         let originalSpeakPermission = null;
 
@@ -47,6 +56,10 @@ class VoteMuteService {
           try {
             if (permissionOverwrites != null) {
               await voiceChannel.overwritePermissions(candidate, { SPEAK: originalSpeakPermission });
+              await requestHelper.post(
+                `${this.voteMuteRestServiceUrl}/complete`,
+                this.createVotationRequest(voteResult.votation)
+              );
             } else {
               let permissionOverwrite = voiceChannel.permissionOverwrites.get(candidate.id);
               if (permissionOverwrite != null) await permissionOverwrite.delete();
@@ -76,13 +89,18 @@ class VoteMuteService {
     return Math.floor(potentialVoterQtdy / 2) + 1;
   }
 
-  createVote (candidate, voter, voiceChannel) {
+  createVoteRequest (candidate, voter, voiceChannel) {
     return {
       candidateDiscordId: candidate.id,
       voterDiscordId: voter.id,
       channelDiscordId: voiceChannel.id,
       dateTimeIndex: moment().format('YYYYMMDDHHmmss')
     };
+  }
+
+  createVotationRequest (votation) {
+    let { candidateDiscordId, channelDiscordId, startedDateTime: dateTimeIndex } = votation;
+    return { candidateDiscordId, channelDiscordId, dateTimeIndex };
   }
 }
 

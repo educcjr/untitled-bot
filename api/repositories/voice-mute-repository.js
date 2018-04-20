@@ -5,13 +5,17 @@ class VoiceMuteRepository {
     this.datastoreHelper = new DatastoreHelper(DatastoreHelper.kinds.VOICE_MUTE, datastore);
   }
 
-  find (initialDateTime, finalDateTime) {
+  async find (initialDateTime, finalDateTime, channelDiscordId, candidateDiscordId) {
     let query = this.datastoreHelper
       .query()
       .filter('startedDateTime', '>=', initialDateTime)
       .filter('startedDateTime', '<=', finalDateTime);
 
-    return this.datastoreHelper.runQuery(query);
+    return (await this.datastoreHelper.runQuery(query))
+      .reverse()
+      .filter(votation => votation.channelDiscordId === channelDiscordId)
+      .filter(votation => !(votation.closed && votation.muteCompleted))
+      .find(votation => votation.candidateDiscordId === candidateDiscordId);
   }
 
   create (candidateDiscordId, channelDiscordId, startedDateTime, vote) {
@@ -19,7 +23,9 @@ class VoiceMuteRepository {
       candidateDiscordId,
       channelDiscordId,
       startedDateTime,
-      votes: [ vote ]
+      votes: [ vote ],
+      closed: false,
+      muteCompleted: false
     });
   }
 
@@ -28,6 +34,34 @@ class VoiceMuteRepository {
       ...votationEntity,
       votes: [ ...votationEntity.votes, vote ]
     });
+  }
+
+  async closeVotation (candidateDiscordId, channelDiscordId, dateTimeIndex) {
+    let votation = await this.findSpecific(dateTimeIndex, candidateDiscordId, channelDiscordId);
+
+    return this.datastoreHelper.update({
+      ...votation,
+      closed: true
+    });
+  }
+
+  async completeMute (candidateDiscordId, channelDiscordId, dateTimeIndex) {
+    let votation = await this.findSpecific(dateTimeIndex, candidateDiscordId, channelDiscordId);
+
+    return this.datastoreHelper.update({
+      ...votation,
+      muteCompleted: true
+    });
+  }
+
+  async findSpecific (dateTimeIndex, candidateDiscordId, channelDiscordId) {
+    let query = this.datastoreHelper
+      .query()
+      .filter('startedDateTime', dateTimeIndex)
+      .filter('candidateDiscordId', candidateDiscordId)
+      .filter('channelDiscordId', channelDiscordId);
+
+    return (await this.datastoreHelper.runQuery(query))[0];
   }
 }
 

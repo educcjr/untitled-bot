@@ -27,6 +27,38 @@ class VoteMuteRouter {
       }
     });
 
+    router.post('/close', async (req, res) => {
+      try {
+        let { candidateDiscordId, channelDiscordId, dateTimeIndex } = req.body;
+
+        let voteResult = await this.voteMuteService.closeVotation(
+          candidateDiscordId,
+          channelDiscordId,
+          dateTimeIndex
+        );
+
+        return res.send(voteResult);
+      } catch (err) {
+        return res.sendError(err);
+      }
+    });
+
+    router.post('/complete', async (req, res) => {
+      try {
+        let { candidateDiscordId, channelDiscordId, dateTimeIndex } = req.body;
+
+        let voteResult = await this.voteMuteService.completeMute(
+          candidateDiscordId,
+          channelDiscordId,
+          dateTimeIndex
+        );
+
+        return res.send(voteResult);
+      } catch (err) {
+        return res.sendError(err);
+      }
+    });
+
     return router;
   }
 }
