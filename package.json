@@ -7,10 +7,9 @@
     "build": "webpack -p",
     "start": "pm2 startOrRestart process.yml",
     "dev": "concurrently -k \"nodemon ./bot/index.js\" \"nodemon ./api/index.js\" \"webpack-dev-server\"",
-    "devbot": "concurrently -k \"nodemon --inspect=9202 --watch api ./api/index.js\" \"nodemon --inspect=9201 --watch bot ./bot/index.js\"",
-    "devbotbrk": "concurrently -k \"node --inspect-brk ./bot/index.js\" \"node ./api/index.js\"",
+    "devbot": "concurrently -k \"npm run devapi\" \"nodemon --inspect=9201 --watch bot ./bot/index.js\"",
     "devui": "concurrently -k \"nodemon ./api/index.js\" \"webpack-dev-server\"",
-    "devapi": "nodemon ./api/index.js",
+    "devapi": "nodemon --inspect=9202 --watch api ./api/index.js",
     "test": "mocha"
   },
   "author": "",
