@@ -10,6 +10,7 @@ class VoteMuteService {
   async vote (candidateDiscordId, voterDiscordId, channelDiscordId, dateTimeIndex) {
     let result = { created: false, voted: false, onGoing: false, votation: {} };
 
+    dateTimeIndex = parseInt(dateTimeIndex);
     let initialDateTime = parseInt(
       moment(dateTimeIndex, DATE_TIME_FORMAT)
         .subtract(20, 'minutes')

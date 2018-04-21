@@ -5,8 +5,9 @@ const requestHelper = require('./../../common/request-helper');
 const permissionsHelper = require('./../helpers/permissions-helper');
 
 class VoteMuteService {
-  constructor (apiPath) {
+  constructor (apiPath, afkChannelDiscordId) {
     this.voteMuteRestServiceUrl = `${apiPath}/mute`;
+    this.afkChannelDiscordId = afkChannelDiscordId;
   }
 
   async vote (voter, candidate, voiceChannel, textChannel) {
@@ -51,19 +52,23 @@ class VoteMuteService {
         }
 
         await voiceChannel.overwritePermissions(candidate, { SPEAK: false });
+        await candidate.setVoiceChannel(this.afkChannelDiscordId);
+        await candidate.setVoiceChannel(voiceChannel);
 
         setTimeout(async () => {
           try {
             if (permissionOverwrites != null) {
               await voiceChannel.overwritePermissions(candidate, { SPEAK: originalSpeakPermission });
-              await requestHelper.post(
-                `${this.voteMuteRestServiceUrl}/complete`,
-                this.createVotationRequest(voteResult.votation)
-              );
             } else {
               let permissionOverwrite = voiceChannel.permissionOverwrites.get(candidate.id);
               if (permissionOverwrite != null) await permissionOverwrite.delete();
             }
+
+            await requestHelper.post(
+              `${this.voteMuteRestServiceUrl}/complete`,
+              this.createVotationRequest(voteResult.votation)
+            );
+
             textChannel.send(`${candidate.displayName} desmutado.`);
           } catch (err) {
             textChannel.send(`Algum bug ao desmutar o ${candidate.displayName}.`);
@@ -72,7 +77,7 @@ class VoteMuteService {
 
         return outdent`
           Votação encerrada!
-          Usuário ${candidate.displayName} foi mutado por 2 minutos.
+          ${candidate.displayName} foi mutado por 2 minutos.
         `;
       } else {
         return outdent`
