@@ -1,4 +1,6 @@
-/node_modules
+node_modules/
+.tmp/*
+
 app-configs.js
 keyfile.json
 
@@ -6,4 +8,5 @@ web/public/*
 !web/public/index.html
 !web/public/icon.png
 !web/public/_redirects
-.tmp/*
+
+bot/greetings-audios/

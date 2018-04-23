@@ -1,3 +1,8 @@
+const path = require('path');
+const fs = require('fs');
+
+const download = require('download');
+
 const mathHelper = require('./../../common/math-helper');
 const requestHelper = require('./../../common/request-helper');
 
@@ -5,7 +10,6 @@ class VoiceService {
   constructor (apiPath) {
     this.apiPath = apiPath;
     this.streaming = false;
-    this.voiceConnection = null;
   }
 
   async greetings (member) {
@@ -14,31 +18,30 @@ class VoiceService {
       return;
     }
 
-    if (this.voiceConnection != null && this.voiceConnection.id === member.voiceChannelID) {
-      await this.playAudio(member.id);
-    } else {
-      this.voiceConnection = await member.voiceChannel.join();
-
-      this.voiceConnection.on('disconnect', () => {
-        this.voiceConnection = null;
-      });
-
-      await this.playAudio(member.id);
-    }
+    let conn = await member.voiceChannel.join();
+    await this.playAudio(member.id, conn);
   }
 
-  async playAudio (memberId) {
+  async playAudio (memberId, conn) {
     try {
       this.streaming = true;
 
       let audios = await requestHelper.get(`${this.apiPath}/greetings/audio/${memberId}`);
 
-      let audioIndex = mathHelper.getRandomInt(0, audios.length - 1);
-      let audioRemotePath = audios[audioIndex].path;
-      let dispatcher = this.voiceConnection.playArbitraryInput(audioRemotePath);
+      let randomIndex = mathHelper.getRandomInt(0, audios.length - 1);
+      let audioUrl = audios[randomIndex].path;
+      let localAudioDirectory = path.join(__dirname, '..', 'greetings-audios');
+      let localAudioPath = path.join(localAudioDirectory, path.basename(audioUrl));
+
+      if (!fs.existsSync(localAudioPath)) {
+        await download(audioUrl, localAudioDirectory);
+      }
+
+      let dispatcher = conn.playFile(localAudioPath);
 
       let endFunc = () => {
         this.streaming = false;
+        conn.disconnect();
       };
 
       dispatcher.on('end', endFunc);
