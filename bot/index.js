@@ -13,34 +13,41 @@ client.on('ready', () => {
   // TODO: multiple guilds
   let defaultGuild = client.guilds.first();
 
-  const userRestService = new UserRestService(appConfigs.API_PATH);
+  let userRestService = new UserRestService(appConfigs.API_PATH);
 
-  const replyService = new ReplyService();
-  const voiceService = new VoiceService(appConfigs.API_PATH);
-  const voteMuteService = new VoteMuteService(appConfigs.API_PATH, defaultGuild.afkChannelID);
-  const commandService = new CommandService(client, userRestService, voteMuteService);
+  let replyService = new ReplyService();
+  let voiceService = new VoiceService(appConfigs.API_PATH);
+  let voteMuteService = new VoteMuteService(appConfigs.API_PATH, defaultGuild.afkChannelID);
+  let commandService = new CommandService(client, userRestService, voteMuteService);
 
   console.log('I am ready!');
   console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 
   client.on('message', async (message) => {
-    if (message.content.substr(0, 5) === '/ubot') {
-      try {
+    try {
+      if (message.content.substr(0, 5) === '/ubot') {
         await commandService.execute(message.content.substr(6), message);
-      } catch (err) {
-        message.channel.send('BUGS TODONDE');
+      } else {
+        replyService.reply(message);
       }
-    } else {
-      replyService.reply(message);
+    } catch (err) {
+      console.log(err);
+      message.channel.send('BUGS TODONDE');
     }
   });
 
-  client.on('voiceStateUpdate', (oldMember, newMember) => {
-    if (!voiceService.isStreaming() &&
+  client.on('voiceStateUpdate', async (oldMember, newMember) => {
+    try {
+      if (
         !newMember.user.bot &&
         newMember.voiceChannel &&
-        newMember.voiceChannelID !== oldMember.voiceChannelID) {
-      voiceService.greetings(newMember);
+        newMember.voiceChannelID !== oldMember.voiceChannelID &&
+        newMember.voiceChannelID !== defaultGuild.afkChannelID
+      ) {
+        await voiceService.greetings(newMember);
+      }
+    } catch (err) {
+      console.log(err);
     }
   });
 });

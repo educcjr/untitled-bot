@@ -1,46 +1,54 @@
+const mathHelper = require('./../../common/math-helper');
 const requestHelper = require('./../../common/request-helper');
 
 class VoiceService {
   constructor (apiPath) {
     this.apiPath = apiPath;
     this.streaming = false;
-  }
-  isStreaming () {
-    return this.streaming;
+    this.voiceConnection = null;
   }
 
-  greetings (member) {
-    member.voiceChannel
-      .join()
-      .then(conn => {
-        this.streaming = true;
-        requestHelper.get(`${this.apiPath}/greetings/audio/${member.user.id}`)
-          .then(audios => {
-            const audioIndex = this.getRandomInt(1, audios.length) - 1;
-            this.playAudio(audios[audioIndex].path, conn);
-          });
-      })
-      .catch(err => console.log(err));
-  }
-  // TODO: extract into a reusable class
-  getRandomInt (min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  async greetings (member) {
+    if (this.streaming) {
+      // TODO: greetings queue;
+      return;
+    }
+
+    if (this.voiceConnection != null && this.voiceConnection.id === member.voiceChannelID) {
+      await this.playAudio(member.id);
+    } else {
+      this.voiceConnection = await member.voiceChannel.join();
+
+      this.voiceConnection.on('disconnect', () => {
+        this.voiceConnection = null;
+      });
+
+      await this.playAudio(member.id);
+    }
   }
 
-  playAudio (userAudioUrl, conn) {
-    this.streaming = true;
-    const dispatcher = conn.playArbitraryInput(userAudioUrl);
+  async playAudio (memberId) {
+    try {
+      this.streaming = true;
 
-    let endFunc = () => {
+      let audios = await requestHelper.get(`${this.apiPath}/greetings/audio/${memberId}`);
+
+      let audioIndex = mathHelper.getRandomInt(0, audios.length - 1);
+      let audioRemotePath = audios[audioIndex].path;
+      let dispatcher = this.voiceConnection.playArbitraryInput(audioRemotePath);
+
+      let endFunc = () => {
+        this.streaming = false;
+      };
+
+      dispatcher.on('end', endFunc);
+      dispatcher.on('error', (err) => {
+        console.log(err);
+        endFunc();
+      });
+    } catch (err) {
       this.streaming = false;
-      conn.channel.leave();
-    };
-
-    dispatcher.on('end', endFunc);
-    dispatcher.on('error', err => {
-      console.log(err);
-      endFunc();
-    });
+    }
   }
 }
 
