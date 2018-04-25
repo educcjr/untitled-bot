@@ -10,6 +10,7 @@ class VoiceService {
   constructor (apiPath) {
     this.apiPath = apiPath;
     this.streaming = false;
+    this.voiceConn = null;
   }
 
   async greetings (member) {
@@ -18,8 +19,12 @@ class VoiceService {
       return;
     }
 
-    let conn = await member.voiceChannel.join();
-    await this.playAudio(member.id, conn);
+    if (this.voiceConn == null || this.voiceConn.channel.id !== member.voiceChannelID) {
+      this.voiceConn = await member.voiceChannel.join();
+      this.voiceConn.on('disconnect', () => { this.voiceConn = null; });
+    }
+
+    await this.playAudio(member.id, this.voiceConn);
   }
 
   async playAudio (memberId, conn) {
@@ -41,7 +46,6 @@ class VoiceService {
 
       let endFunc = () => {
         this.streaming = false;
-        conn.disconnect();
       };
 
       dispatcher.on('end', endFunc);
