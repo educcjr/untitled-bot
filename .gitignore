@@ -3,6 +3,7 @@ node_modules/
 
 app-configs.js
 keyfile.json
+firebase-key.json
 
 web/public/*
 !web/public/index.html
