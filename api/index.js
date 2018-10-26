@@ -2,50 +2,50 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
-const appConfigs = require('./../app-configs');
-
-const Datastore = require('@google-cloud/datastore');
-const Storage = require('@google-cloud/storage');
+const StorageService = require('./services/storage-service');
 
 const UserRepository = require('./repositories/user-repository');
+const AudioGreetingRepository = require('./repositories/audio-greeting-repository');
 const VoiceMuteRepository = require('./repositories/voice-mute-repository');
+
+const AudioGreetingService = require('./services/audio-greeting-service');
 
 const openDotaRouter = require('./routers/open-dota-router');
 const UserRouter = require('./routers/user-router');
-const greetingsRouter = require('./routers/greetings-router');
+const AudioGreetingRouter = require('./routers/audio-greeting-router');
 const VoteMuteRouter = require('./routers/vote-mute-router');
 
-const gcpAuth = {
-  projectId: appConfigs.GCP_PROJECTID,
-  credentials: require('./../keyfile.json')
-};
-const datastore = Datastore(gcpAuth);
-const storage = Storage(gcpAuth);
-
-const userRepository = new UserRepository(datastore);
-const voiceMuteRepository = new VoiceMuteRepository(datastore);
-
-const userRouter = new UserRouter(userRepository);
-const voteMuteRouter = new VoteMuteRouter(voiceMuteRepository);
+const appConfigs = require('./../app-configs');
 
 app.use(cors());
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
-  req.datastore = datastore;
-  req.storage = storage;
-  req.bucket = storage.bucket(appConfigs.GCP_BUCKET);
-  req.bucketUrl = appConfigs.GCP_BUCKET_URL;
   res.sendError = (err, status = 500) => {
     res.status(status).send({ message: err.message, stack: err.stack });
   };
   next();
 });
 
+let datastore = null;
+let connection = mongoose.createConnection(appConfigs.MLAB_CONN_STR);
+let storageService = new StorageService();
+
+let userRepository = new UserRepository(datastore);
+let audioGreetingRepository = new AudioGreetingRepository(connection);
+let voiceMuteRepository = new VoiceMuteRepository(datastore);
+
+let audioGreetingService = new AudioGreetingService(audioGreetingRepository, storageService);
+
+let userRouter = new UserRouter(userRepository);
+let audioGreetingRouter = new AudioGreetingRouter(audioGreetingService);
+let voteMuteRouter = new VoteMuteRouter(voiceMuteRepository);
+
 app.use('/user', userRouter.router());
 app.use('/odota', openDotaRouter);
-app.use('/greetings', greetingsRouter);
+app.use('/greetings', audioGreetingRouter.router());
 app.use('/mute', voteMuteRouter.router());
 
 const port = process.env.NODE_ENV === 'test'

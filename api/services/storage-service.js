@@ -17,7 +17,7 @@ class StorageService {
     this.bucket = firebase.storage().bucket();
   }
 
-  async upload (path, filename) {
+  async uploadGreeting (path, filename) {
     let resultPath = null;
 
     let destination = `${FOLDERS.greetings}/${filename}`;
