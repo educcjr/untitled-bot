@@ -37,15 +37,15 @@ class AudioGreetingRouter {
 
     router.post('/audio', uploadParser.single('file'), async (req, res) => {
       try {
-        res.send(await this.audioGreetingService.save(req.body.id, req.file));
+        res.send(await this.audioGreetingService.create(req.body.id, req.file));
       } catch (err) {
         res.sendError(err);
       }
     });
 
-    router.delete('/audio/:objectId', async (req, res) => {
+    router.delete('/audio/:discordId', async (req, res) => {
       try {
-        res.send(await this.audioGreetingService.delete(req.params.objectId));
+        res.send(await this.audioGreetingService.delete(req.params.discordId));
       } catch (err) {
         res.sendError(err);
       }

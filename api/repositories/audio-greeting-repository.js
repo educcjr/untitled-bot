@@ -1,29 +1,29 @@
 const mongoose = require('mongoose');
 
-const audioGreetingModel = new mongoose.Schema({
+const audioGreetingSchema = new mongoose.Schema({
   discordId: { type: String, index: true },
   name: String
 });
 
 class AudioGreetingRepository {
   constructor (connection) {
-    this.model = connection.model('AudioGreeting', audioGreetingModel);
-  }
-
-  get (discordId) {
-    return this.model.find({ discordId });
+    this.model = connection.model('AudioGreeting', audioGreetingSchema);
   }
 
   getAll () {
     return this.model.find({});
   }
 
-  create (discordId, name) {
-    return this.model.create({ discordId, name });
+  get (discordId) {
+    return this.model.find({ discordId });
   }
 
-  delete (objectId) {
-    return this.model.findByIdAndRemove(objectId);
+  create (audioGreeting) {
+    return this.model.create(audioGreeting);
+  }
+
+  delete (discordId) {
+    return this.model.findOneAndDelete({ discordId });
   }
 }
 
