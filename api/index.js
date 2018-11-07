@@ -10,13 +10,14 @@ const UserRepository = require('./repositories/user-repository');
 const AudioGreetingRepository = require('./repositories/audio-greeting-repository');
 const VoiceMuteRepository = require('./repositories/voice-mute-repository');
 
-const AudioGreetingService = require('./services/audio-greeting-service');
 const UserService = require('./services/user-service');
+const AudioGreetingService = require('./services/audio-greeting-service');
+const OpenDotaService = require('./services/open-dota-service');
 
-const openDotaRouter = require('./routers/open-dota-router');
 const UserRouter = require('./routers/user-router');
 const AudioGreetingRouter = require('./routers/audio-greeting-router');
 const VoteMuteRouter = require('./routers/vote-mute-router');
+const OpenDotaRouter = require('./routers/open-dota-router');
 
 const appConfigs = require('./../app-configs');
 
@@ -30,10 +31,12 @@ let voiceMuteRepository = new VoiceMuteRepository(datastore);
 
 let userService = new UserService(userRepository);
 let audioGreetingService = new AudioGreetingService(audioGreetingRepository, storageService);
+let openDotaService = new OpenDotaService();
 
 let userRouter = new UserRouter(userService);
 let audioGreetingRouter = new AudioGreetingRouter(audioGreetingService);
 let voteMuteRouter = new VoteMuteRouter(voiceMuteRepository);
+let openDotaRouter = new OpenDotaRouter(openDotaService);
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -46,9 +49,9 @@ app.use((req, res, next) => {
 });
 
 app.use('/user', userRouter.router());
-app.use('/odota', openDotaRouter);
 app.use('/audio-greeting', audioGreetingRouter.router());
 app.use('/mute', voteMuteRouter.router());
+app.use('/odota', openDotaRouter.router());
 
 const port = process.env.NODE_ENV === 'test'
   ? appConfigs.API_TEST_PORT
