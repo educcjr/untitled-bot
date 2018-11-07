@@ -19,7 +19,7 @@ class AudioGreetingRouter {
   router () {
     const router = express.Router();
 
-    router.get('/audio', async (req, res) => {
+    router.get('/', async (req, res) => {
       try {
         res.send(await this.audioGreetingService.getAll());
       } catch (err) {
@@ -27,7 +27,7 @@ class AudioGreetingRouter {
       }
     });
 
-    router.get('/audio/:discordId', async (req, res) => {
+    router.get('/:discordId', async (req, res) => {
       try {
         res.send(await this.audioGreetingService.get(req.params.discordId));
       } catch (err) {
@@ -35,7 +35,7 @@ class AudioGreetingRouter {
       }
     });
 
-    router.post('/audio', uploadParser.single('file'), async (req, res) => {
+    router.post('/', uploadParser.single('file'), async (req, res) => {
       try {
         res.send(await this.audioGreetingService.create(req.body.id, req.file));
       } catch (err) {
@@ -43,7 +43,7 @@ class AudioGreetingRouter {
       }
     });
 
-    router.delete('/audio/:discordId', async (req, res) => {
+    router.delete('/:discordId', async (req, res) => {
       try {
         res.send(await this.audioGreetingService.delete(req.params.discordId));
       } catch (err) {

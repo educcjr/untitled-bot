@@ -11,6 +11,7 @@ const AudioGreetingRepository = require('./repositories/audio-greeting-repositor
 const VoiceMuteRepository = require('./repositories/voice-mute-repository');
 
 const AudioGreetingService = require('./services/audio-greeting-service');
+const UserService = require('./services/user-service');
 
 const openDotaRouter = require('./routers/open-dota-router');
 const UserRouter = require('./routers/user-router');
@@ -18,6 +19,21 @@ const AudioGreetingRouter = require('./routers/audio-greeting-router');
 const VoteMuteRouter = require('./routers/vote-mute-router');
 
 const appConfigs = require('./../app-configs');
+
+let datastore = null;
+let connection = mongoose.createConnection(appConfigs.MLAB_CONN_STR);
+let storageService = new StorageService();
+
+let userRepository = new UserRepository(connection);
+let audioGreetingRepository = new AudioGreetingRepository(connection);
+let voiceMuteRepository = new VoiceMuteRepository(datastore);
+
+let userService = new UserService(userRepository);
+let audioGreetingService = new AudioGreetingService(audioGreetingRepository, storageService);
+
+let userRouter = new UserRouter(userService);
+let audioGreetingRouter = new AudioGreetingRouter(audioGreetingService);
+let voteMuteRouter = new VoteMuteRouter(voiceMuteRepository);
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -29,28 +45,15 @@ app.use((req, res, next) => {
   next();
 });
 
-let datastore = null;
-let connection = mongoose.createConnection(appConfigs.MLAB_CONN_STR);
-let storageService = new StorageService();
-
-let userRepository = new UserRepository(datastore);
-let audioGreetingRepository = new AudioGreetingRepository(connection);
-let voiceMuteRepository = new VoiceMuteRepository(datastore);
-
-let audioGreetingService = new AudioGreetingService(audioGreetingRepository, storageService);
-
-let userRouter = new UserRouter(userRepository);
-let audioGreetingRouter = new AudioGreetingRouter(audioGreetingService);
-let voteMuteRouter = new VoteMuteRouter(voiceMuteRepository);
-
 app.use('/user', userRouter.router());
 app.use('/odota', openDotaRouter);
-app.use('/greetings', audioGreetingRouter.router());
+app.use('/audio-greeting', audioGreetingRouter.router());
 app.use('/mute', voteMuteRouter.router());
 
 const port = process.env.NODE_ENV === 'test'
   ? appConfigs.API_TEST_PORT
   : appConfigs.API_PORT;
+
 app.listen(port, () => {
   console.log('Api running on: ' + port);
   console.log(`NODE_ENV: ${process.env.NODE_ENV}`);

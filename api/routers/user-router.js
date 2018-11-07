@@ -1,46 +1,40 @@
 const express = require('express');
 
-const UserService = require('./../services/user-service');
-
 class UserRouter {
-  constructor (userRepository) {
-    this.userService = new UserService(userRepository);
+  constructor (userService) {
+    this.userService = userService;
   }
 
   router () {
     const router = express.Router();
 
+    router.get('/', async (req, res) => {
+      try {
+        res.send(await this.userService.getAll());
+      } catch (err) {
+        res.sendError(err);
+      }
+    });
+
     router.post('/', async (req, res) => {
       try {
-        let { id: discordId, name } = req.body;
+        let { discordId, name } = req.body;
 
         if (!discordId || !name) {
           throw new Error('Nome do usuário ou discordId não foi enviado.');
         }
 
-        let createOrUpdateResult = await this.userService.createOrUpdate(discordId, name);
-
-        return res.send(createOrUpdateResult);
+        res.send(await this.userService.createOrUpdate({ discordId, name }));
       } catch (err) {
-        return res.sendError(err);
+        res.sendError(err);
       }
     });
 
-    router.get('/', async (req, res) => {
+    router.delete('/:discordId', async (req, res) => {
       try {
-        let users = await this.userService.getAll();
-        return res.send(users);
+        res.send(await this.userService.delete(req.params.discordId));
       } catch (err) {
-        return res.sendError(err);
-      }
-    });
-
-    router.delete('/:id', async (req, res) => {
-      try {
-        let key = await this.userService.delete(req.params.id);
-        return res.send(key);
-      } catch (err) {
-        return res.sendError(err);
+        res.sendError(err);
       }
     });
 

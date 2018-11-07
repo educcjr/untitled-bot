@@ -7,33 +7,18 @@ class UserService {
     return this.userRepository.getAll();
   }
 
-  async createOrUpdate (discordId, name) {
-    let result = { user: null, isNew: false };
+  async createOrUpdate (user) {
+    let existing = await this.userRepository.createOrUpdate(user);
+    let updated = await this.userRepository.get(user.discordId);
 
-    let user = await this.userRepository.get(discordId);
-    result.isNew = user == null;
-
-    if (result.isNew) {
-      user = await this.userRepository.create(discordId, name);
-    } else {
-      user = await this.userRepository.update(user, name);
-    }
-
-    result.user = user;
-    return result;
+    return {
+      existing,
+      updated
+    };
   }
 
-  async delete (discordId) {
-    let result = { deleted: false, key: null };
-
-    let user = await this.userRepository.get(discordId);
-
-    if (user != null) {
-      result.key = await this.userRepository.delete(user);
-      result.deleted = true;
-    }
-
-    return result;
+  delete (discordId) {
+    return this.userRepository.delete(discordId);
   }
 }
 

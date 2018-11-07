@@ -1,39 +1,41 @@
-const DatastoreHelper = require('./datastore-helper');
+const mongoose = require('mongoose');
+
+const userSchema = new mongoose.Schema({
+  discordId: { type: String, index: true },
+  name: String
+});
 
 class UserRepository {
-  constructor (datastore) {
-    this.datastoreHelper = new DatastoreHelper(DatastoreHelper.kinds.USER, datastore);
-  }
-
-  async get (discordId) {
-    let query = this.datastoreHelper
-      .query()
-      .filter('discordId', discordId);
-
-    let entities = await this.datastoreHelper.runQuery(query);
-
-    if (entities.length > 1) {
-      throw new Error('Existem usuários duplicados no banco de dados.');
-    }
-
-    let user = entities[0];
-    return user;
+  constructor (connection) {
+    this.model = connection.model('User', userSchema);
   }
 
   getAll () {
-    return this.datastoreHelper.getAll();
+    return this.model.find({});
   }
 
-  create (discordId, name) {
-    return this.datastoreHelper.insert({ discordId, name });
+  get (discordId) {
+    return this.model.find({ discordId });
   }
 
-  update (userEntity, name) {
-    return this.datastoreHelper.update({ ...userEntity, name });
+  create (user) {
+    return this.model.create(user);
   }
 
-  delete (user) {
-    return this.datastoreHelper.delete(user);
+  update (user) {
+    return this.model.findOneAndUpdate({ discordId: user.discordId }, user);
+  }
+
+  createOrUpdate (user) {
+    return this.model.findOneAndUpdate(
+      { discordId: user.discordId },
+      user,
+      { upsert: true }
+    );
+  }
+
+  delete (discordId) {
+    return this.model.findOneAndDelete({ discordId });
   }
 }
 
