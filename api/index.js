@@ -8,7 +8,7 @@ const StorageService = require('./services/storage-service');
 
 const UserRepository = require('./repositories/user-repository');
 const AudioGreetingRepository = require('./repositories/audio-greeting-repository');
-const VoiceMuteRepository = require('./repositories/voice-mute-repository');
+const VoteMuteRepository = require('./repositories/vote-mute-repository');
 
 const UserService = require('./services/user-service');
 const AudioGreetingService = require('./services/audio-greeting-service');
@@ -27,11 +27,11 @@ let storageService = new StorageService();
 
 let userRepository = new UserRepository(connection);
 let audioGreetingRepository = new AudioGreetingRepository(connection);
-let voiceMuteRepository = new VoiceMuteRepository(connection);
+let voteMuteRepository = new VoteMuteRepository(connection);
 
 let userService = new UserService(userRepository);
 let audioGreetingService = new AudioGreetingService(audioGreetingRepository, storageService);
-let voteMuteService = new VoteMuteService(voiceMuteRepository);
+let voteMuteService = new VoteMuteService(voteMuteRepository);
 let openDotaService = new OpenDotaService();
 
 let userRouter = new UserRouter(userService);

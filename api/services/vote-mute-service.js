@@ -3,8 +3,8 @@ const moment = require('moment');
 const DATE_TIME_FORMAT = 'YYYYMMDDHHmmss';
 
 class VoteMuteService {
-  constructor (voiceMuteRepository) {
-    this.voiceMuteRepository = voiceMuteRepository;
+  constructor (voteMuteRepository) {
+    this.voteMuteRepository = voteMuteRepository;
   }
 
   async vote (candidateDiscordId, voterDiscordId, channelDiscordId, dateTimeIndex) {
@@ -17,7 +17,7 @@ class VoteMuteService {
         .format(DATE_TIME_FORMAT)
     );
 
-    let votation = await this.voiceMuteRepository.find(initialDateTime, dateTimeIndex, channelDiscordId, candidateDiscordId);
+    let votation = await this.voteMuteRepository.find(initialDateTime, dateTimeIndex, channelDiscordId, candidateDiscordId);
 
     if (votation != null && votation.closed) {
       result.onGoing = true;
@@ -29,13 +29,13 @@ class VoteMuteService {
 
     if (votation != null) {
       if (votation.votes.find(vote => vote.discordId === voterDiscordId) == null) {
-        votation = await this.voiceMuteRepository.vote(votation, vote);
+        votation = await this.voteMuteRepository.vote(votation, vote);
         result.voted = true;
       } else {
         result.voted = false;
       }
     } else {
-      votation = await this.voiceMuteRepository.create(
+      votation = await this.voteMuteRepository.create(
         candidateDiscordId,
         channelDiscordId,
         dateTimeIndex,
@@ -50,11 +50,11 @@ class VoteMuteService {
   }
 
   async closeVotation (candidateDiscordId, channelDiscordId, startedDateTimeIndex) {
-    return this.voiceMuteRepository.closeVotation(candidateDiscordId, channelDiscordId, startedDateTimeIndex);
+    return this.voteMuteRepository.closeVotation(candidateDiscordId, channelDiscordId, startedDateTimeIndex);
   }
 
   async completeMute (candidateDiscordId, channelDiscordId, startedDateTimeIndex) {
-    return this.voiceMuteRepository.completeMute(candidateDiscordId, channelDiscordId, startedDateTimeIndex);
+    return this.voteMuteRepository.completeMute(candidateDiscordId, channelDiscordId, startedDateTimeIndex);
   }
 }
 

@@ -14,7 +14,7 @@ const voteMuteSchema = new mongoose.Schema({
   votes: [voteSchema]
 });
 
-class VoiceMuteRepository {
+class VoteMuteRepository {
   constructor (connection) {
     this.model = connection.model('VoteMute', voteMuteSchema);
   }
@@ -64,4 +64,4 @@ class VoiceMuteRepository {
   }
 }
 
-module.exports = VoiceMuteRepository;
+module.exports = VoteMuteRepository;
