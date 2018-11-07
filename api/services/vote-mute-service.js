@@ -49,12 +49,12 @@ class VoteMuteService {
     return result;
   }
 
-  async closeVotation (candidateDiscordId, channelDiscordId, dateTimeIndex) {
-    return this.voiceMuteRepository.closeVotation(candidateDiscordId, channelDiscordId, dateTimeIndex);
+  async closeVotation (candidateDiscordId, channelDiscordId, startedDateTimeIndex) {
+    return this.voiceMuteRepository.closeVotation(candidateDiscordId, channelDiscordId, startedDateTimeIndex);
   }
 
-  async completeMute (candidateDiscordId, channelDiscordId, dateTimeIndex) {
-    return this.voiceMuteRepository.completeMute(candidateDiscordId, channelDiscordId, dateTimeIndex);
+  async completeMute (candidateDiscordId, channelDiscordId, startedDateTimeIndex) {
+    return this.voiceMuteRepository.completeMute(candidateDiscordId, channelDiscordId, startedDateTimeIndex);
   }
 }
 

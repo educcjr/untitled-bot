@@ -1,67 +1,66 @@
-const DatastoreHelper = require('./datastore-helper');
+const mongoose = require('mongoose');
+
+const voteSchema = new mongoose.Schema({
+  discordId: String,
+  dateTimeIndex: Number
+});
+
+const voteMuteSchema = new mongoose.Schema({
+  startedDateTimeIndex: { type: Number, index: true },
+  channelDiscordId: String,
+  candidateDiscordId: String,
+  closed: Boolean,
+  muteCompleted: Boolean,
+  votes: [voteSchema]
+});
 
 class VoiceMuteRepository {
-  constructor (datastore) {
-    this.datastoreHelper = new DatastoreHelper(DatastoreHelper.kinds.VOICE_MUTE, datastore);
+  constructor (connection) {
+    this.model = connection.model('VoteMute', voteMuteSchema);
   }
 
-  async find (initialDateTime, finalDateTime, channelDiscordId, candidateDiscordId) {
-    let query = this.datastoreHelper
-      .query()
-      .filter('startedDateTime', '>=', initialDateTime)
-      .filter('startedDateTime', '<=', finalDateTime);
-
-    return (await this.datastoreHelper.runQuery(query))
-      .reverse()
-      .filter(votation => votation.channelDiscordId === channelDiscordId)
-      .filter(votation => !(votation.closed && votation.muteCompleted))
-      .find(votation => votation.candidateDiscordId === candidateDiscordId);
+  find (initialDateTimeIndex, finalDateTimeIndex, channelDiscordId, candidateDiscordId) {
+    return this.model.findOne({
+      startedDateTimeIndex: { $gte: initialDateTimeIndex, $lte: finalDateTimeIndex },
+      channelDiscordId,
+      candidateDiscordId,
+      closed: false
+    });
   }
 
-  create (candidateDiscordId, channelDiscordId, startedDateTime, vote) {
-    return this.datastoreHelper.insert({
+  create (candidateDiscordId, channelDiscordId, startedDateTimeIndex, vote) {
+    return this.model.create({
       candidateDiscordId,
       channelDiscordId,
-      startedDateTime,
+      startedDateTimeIndex,
       votes: [ vote ],
       closed: false,
       muteCompleted: false
     });
   }
 
-  vote (votationEntity, vote) {
-    return this.datastoreHelper.update({
-      ...votationEntity,
-      votes: [ ...votationEntity.votes, vote ]
-    });
+  vote (votation, vote) {
+    return this.model.findByIdAndUpdate(
+      votation._id,
+      { votes: [ ...votation.votes, vote ] },
+      { new: true }
+    );
   }
 
-  async closeVotation (candidateDiscordId, channelDiscordId, dateTimeIndex) {
-    let votation = await this.findSpecific(dateTimeIndex, candidateDiscordId, channelDiscordId);
-
-    return this.datastoreHelper.update({
-      ...votation,
-      closed: true
-    });
+  closeVotation (candidateDiscordId, channelDiscordId, startedDateTimeIndex) {
+    return this.model.findOneAndUpdate(
+      { candidateDiscordId, channelDiscordId, startedDateTimeIndex },
+      { closed: true },
+      { new: true }
+    );
   }
 
-  async completeMute (candidateDiscordId, channelDiscordId, dateTimeIndex) {
-    let votation = await this.findSpecific(dateTimeIndex, candidateDiscordId, channelDiscordId);
-
-    return this.datastoreHelper.update({
-      ...votation,
-      muteCompleted: true
-    });
-  }
-
-  async findSpecific (dateTimeIndex, candidateDiscordId, channelDiscordId) {
-    let query = this.datastoreHelper
-      .query()
-      .filter('startedDateTime', dateTimeIndex)
-      .filter('candidateDiscordId', candidateDiscordId)
-      .filter('channelDiscordId', channelDiscordId);
-
-    return (await this.datastoreHelper.runQuery(query))[0];
+  completeMute (candidateDiscordId, channelDiscordId, startedDateTimeIndex) {
+    return this.model.findOneAndUpdate(
+      { candidateDiscordId, channelDiscordId, startedDateTimeIndex },
+      { muteCompleted: true },
+      { new: true }
+    );
   }
 }
 

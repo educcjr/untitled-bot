@@ -1,10 +1,8 @@
 const express = require('express');
 
-const VoteMuteService = require('./../services/vote-mute-service');
-
 class VoteMuteRouter {
-  constructor (voiceMuteRepository) {
-    this.voteMuteService = new VoteMuteService(voiceMuteRepository);
+  constructor (voteMuteService) {
+    this.voteMuteService = voteMuteService;
   }
 
   router () {

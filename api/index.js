@@ -12,6 +12,7 @@ const VoiceMuteRepository = require('./repositories/voice-mute-repository');
 
 const UserService = require('./services/user-service');
 const AudioGreetingService = require('./services/audio-greeting-service');
+const VoteMuteService = require('./services/vote-mute-service');
 const OpenDotaService = require('./services/open-dota-service');
 
 const UserRouter = require('./routers/user-router');
@@ -21,21 +22,21 @@ const OpenDotaRouter = require('./routers/open-dota-router');
 
 const appConfigs = require('./../app-configs');
 
-let datastore = null;
 let connection = mongoose.createConnection(appConfigs.MLAB_CONN_STR);
 let storageService = new StorageService();
 
 let userRepository = new UserRepository(connection);
 let audioGreetingRepository = new AudioGreetingRepository(connection);
-let voiceMuteRepository = new VoiceMuteRepository(datastore);
+let voiceMuteRepository = new VoiceMuteRepository(connection);
 
 let userService = new UserService(userRepository);
 let audioGreetingService = new AudioGreetingService(audioGreetingRepository, storageService);
+let voteMuteService = new VoteMuteService(voiceMuteRepository);
 let openDotaService = new OpenDotaService();
 
 let userRouter = new UserRouter(userService);
 let audioGreetingRouter = new AudioGreetingRouter(audioGreetingService);
-let voteMuteRouter = new VoteMuteRouter(voiceMuteRepository);
+let voteMuteRouter = new VoteMuteRouter(voteMuteService);
 let openDotaRouter = new OpenDotaRouter(openDotaService);
 
 app.use(cors());
