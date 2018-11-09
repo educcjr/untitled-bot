@@ -20,23 +20,37 @@ class VoiceService {
       return;
     }
 
-    let audios = [];
-    try {
-      audios = await requestHelper.get(`${appSettings.API_PATH}/audio-greeting/${member.id}`);
-    } catch (err) {
-      console.log(err);
-    }
+    let audios = await this.getAudios(member.id);
 
     if (audios.length === 0) {
       return;
     }
 
-    if (this.voiceConn == null || this.voiceConn.channel.id !== member.voiceChannelID) {
-      this.voiceConn = await member.voiceChannel.join();
-      this.voiceConn.on('disconnect', () => { this.voiceConn = null; });
-    }
+    this.voiceConn = this.getVoiceConnection(this.voiceConn, member);
 
     this.playAudio(this.voiceConn, audios);
+  }
+
+  async getAudios (discordId) {
+    let audios = [];
+
+    try {
+      audios = await requestHelper.get(`${appSettings.API_PATH}/audio-greeting/${discordId}`);
+    } catch (err) {
+      console.log(err);
+    }
+
+    return audios;
+  }
+
+  async getVoiceConnection (voiceConn, { voiceChannelID, voiceChannel }) {
+    if (voiceConn == null || voiceConn.channel.id !== voiceChannelID) {
+      let newConn = await voiceChannel.join();
+      newConn.on('disconnect', () => { this.voiceConn = null; });
+      return newConn;
+    }
+
+    return voiceConn;
   }
 
   async playAudio (conn, audios) {
