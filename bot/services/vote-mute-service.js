@@ -4,9 +4,12 @@ const outdent = require('outdent');
 const requestHelper = require('./../../common/request-helper');
 const permissionsHelper = require('./../helpers/permissions-helper');
 
+const appConfigs = require('./../../app-configs');
+
+const VOTE_MUTE_API_URL = `${appConfigs.API_PATH}/mute`;
+
 class VoteMuteService {
-  constructor (apiPath, afkChannelDiscordId) {
-    this.voteMuteRestServiceUrl = `${apiPath}/mute`;
+  constructor (afkChannelDiscordId) {
     this.afkChannelDiscordId = afkChannelDiscordId;
   }
 
@@ -21,7 +24,7 @@ class VoteMuteService {
     }
 
     let voteResult = await requestHelper.post(
-      this.voteMuteRestServiceUrl,
+      VOTE_MUTE_API_URL,
       this.createVoteRequest(candidate, voter, voiceChannel)
     );
 
@@ -37,7 +40,7 @@ class VoteMuteService {
 
       if (votesTotal >= votesNeeded) {
         await requestHelper.post(
-          `${this.voteMuteRestServiceUrl}/close`,
+          `${VOTE_MUTE_API_URL}/close`,
           this.createVotationRequest(voteResult.votation)
         );
 
@@ -65,7 +68,7 @@ class VoteMuteService {
             }
 
             await requestHelper.post(
-              `${this.voteMuteRestServiceUrl}/complete`,
+              `${VOTE_MUTE_API_URL}/complete`,
               this.createVotationRequest(voteResult.votation)
             );
 

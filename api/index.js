@@ -54,12 +54,8 @@ app.use('/audio-greeting', audioGreetingRouter.router());
 app.use('/mute', voteMuteRouter.router());
 app.use('/odota', openDotaRouter.router());
 
-const port = process.env.NODE_ENV === 'test'
-  ? appConfigs.API_TEST_PORT
-  : appConfigs.API_PORT;
-
-app.listen(port, () => {
-  console.log('Api running on: ' + port);
+app.listen(appConfigs.API_PORT, () => {
+  console.log('Api running on: ' + appConfigs.API_PORT);
   console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 });
 

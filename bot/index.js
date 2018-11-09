@@ -13,15 +13,12 @@ client.on('ready', () => {
   // TODO: multiple guilds
   let defaultGuild = client.guilds.first();
 
-  let userRestService = new UserRestService(appConfigs.API_PATH);
+  let userRestService = new UserRestService();
 
   let replyService = new ReplyService();
-  let voiceService = new VoiceService(appConfigs.API_PATH);
-  let voteMuteService = new VoteMuteService(appConfigs.API_PATH, defaultGuild.afkChannelID);
+  let voiceService = new VoiceService();
+  let voteMuteService = new VoteMuteService(defaultGuild.afkChannelID);
   let commandService = new CommandService(client, userRestService, voteMuteService);
-
-  console.log('I am ready!');
-  console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 
   client.on('message', async (message) => {
     try {
@@ -50,6 +47,9 @@ client.on('ready', () => {
       console.log(err);
     }
   });
+
+  console.log('I am ready!');
+  console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 });
 
 client.login(appConfigs.TOKEN);

@@ -3,7 +3,7 @@
 
 const CommandReader = require('./../helpers/command-reader');
 
-const Caixa2 = require('./caixa2-service.js');
+// const Caixa2 = require('./caixa2-service.js');
 const helper = require('../helpers/command-helpers.js');
 
 const withoutGroup = {
@@ -30,7 +30,7 @@ class CommandService {
     this.voteMuteService = voteMuteService;
 
     this.commandReader = new CommandReader();
-    this.caixa2Service = new Caixa2(client);
+    // this.caixa2Service = new Caixa2(client);
   }
 
   /**
@@ -68,7 +68,8 @@ class CommandService {
     } else if (helper.commandMatches(splittedCommand[0], groups.LOUNGE)) {
       this.loungeGroup(splittedCommand, message);
     } else if (helper.commandMatches(splittedCommand[0], groups.CAIXA2)) {
-      this.caixa2(splittedCommand, message);
+      // this.caixa2(splittedCommand, message);
+      channel.send('Comando sob manutenção :c');
     }
   }
 

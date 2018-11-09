@@ -5,7 +5,7 @@ const FOLDERS = {
   greetings: 'greetings'
 };
 const BUCKET = 'untitled-lounge.appspot.com';
-const BUCKET_URL = `https://storage.googleapis.com/${BUCKET}/`;
+const BUCKET_URL = `https://storage.googleapis.com/${BUCKET}`;
 
 class StorageService {
   constructor () {
@@ -25,11 +25,15 @@ class StorageService {
     await this.bucket
       .upload(path, { destination, public: true })
       .then(data => {
-        resultPath = `${BUCKET_URL}${destination}`;
+        resultPath = `${BUCKET_URL}/${destination}`;
       })
       .catch(err => console.error(err));
 
     return resultPath;
+  }
+
+  getUrl (filename) {
+    return `${BUCKET_URL}/${FOLDERS.greetings}/${filename}`;
   }
 }
 

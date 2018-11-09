@@ -1,16 +1,16 @@
 const requestHelper = require('./../../common/request-helper');
 
-class UserService {
-  constructor (apiPath) {
-    this.url = apiPath + '/user';
-  }
+const appConfigs = require('./../../app-configs');
 
-  create (id, name) {
-    return requestHelper.post(this.url, { id, name });
+const USER_API_URL = `${appConfigs.API_PATH}/user`;
+
+class UserService {
+  create (discordId, name) {
+    return requestHelper.post(USER_API_URL, { discordId, name });
   }
 
   list () {
-    return requestHelper.get(this.url);
+    return requestHelper.get(USER_API_URL);
   }
 }
 

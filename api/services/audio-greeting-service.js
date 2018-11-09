@@ -10,8 +10,11 @@ class AudioGreetingService {
     return this.audioGreetingRepository.getAll();
   }
 
-  get (discordId) {
-    return this.audioGreetingRepository.get(discordId);
+  async get (discordId) {
+    return (await this.audioGreetingRepository.get(discordId))
+      .map(audio => {
+        return this.storageService.getUrl(audio.name);
+      });
   }
 
   async create (discordId, file) {

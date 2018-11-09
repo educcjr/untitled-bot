@@ -6,17 +6,17 @@
   "scripts": {
     "build": "webpack -p",
     "start": "pm2 startOrRestart process.yml",
-    "dev": "concurrently -k \"nodemon ./bot/index.js\" \"nodemon ./api/index.js\" \"webpack-dev-server\"",
-    "devbot": "concurrently -k \"npm run devapi\" \"nodemon --inspect=9201 --watch bot ./bot/index.js\"",
-    "devui": "concurrently -k \"npm run devapi\" \"webpack-dev-server\"",
-    "devapi": "nodemon --inspect=9202 --watch api ./api/index.js",
-    "test": "mocha"
+    "debugapi": "nodemon --inspect=9202 --watch api ./api/index.js",
+    "debugbot": "nodemon --inspect=9201 --watch bot ./bot/index.js",
+    "dev": "concurrently -k \"npm run debugbot\" \"npm run debugapi\" \"webpack-dev-server\"",
+    "devapi": "npm run debugapi",
+    "devbot": "concurrently -k \"npm run debugapi\" \"npm run debugbot\"",
+    "devui": "concurrently -k \"npm run debugapi\" \"webpack-dev-server\"",
+    "test": ""
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google-cloud/datastore": "^1.4.0",
-    "@google-cloud/storage": "^1.2.1",
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.1",
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
@@ -24,8 +24,6 @@
     "babel-preset-env": "^1.6.0",
     "babel-preset-react": "^6.24.1",
     "body-parser": "^1.17.2",
-    "chai": "^4.1.2",
-    "chai-http": "^3.0.0",
     "compression-webpack-plugin": "^1.0.0",
     "cors": "^2.8.4",
     "css-loader": "^0.28.4",
@@ -38,8 +36,6 @@
     "firebase-admin": "^6.0.0",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.4",
-    "mocha": "^3.5.3",
-    "mocha-webpack": "^0.7.0",
     "moment": "^2.22.1",
     "mongoose": "^5.3.5",
     "multer": "^1.3.0",
@@ -57,8 +53,7 @@
     "url-loader": "^0.5.9",
     "validator": "^8.2.0",
     "webpack": "^3.6.0",
-    "webpack-dev-server": "^2.6.1",
-    "webpack-node-externals": "^1.6.0"
+    "webpack-dev-server": "^2.6.1"
   },
   "devDependencies": {
     "concurrently": "^3.5.0",
@@ -70,9 +65,6 @@
       "$",
       "FormData",
       "Audio"
-    ],
-    "env": [
-      "mocha"
     ]
   }
 }
