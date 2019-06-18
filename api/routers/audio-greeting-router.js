@@ -4,7 +4,7 @@ const express = require('express');
 const multer = require('multer');
 const uploadParser = multer({
   storage: multer.diskStorage({
-    destination: './../uploads/',
+    destination: process.env.AUDIO_GREETING_UPLOAD_DIR,
     filename: (req, file, cb) => {
       cb(null, Date.now() + path.extname(file.originalname));
     }

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack -p",
     "heroku-postbuild": "",
-    "start": "pm2-runtime start ecosystem.config.js --env production",
+    "start": "pm2-runtime start ecosystem.config.js",
     "devbot-only": "nodemon --watch bot ./bot/index.js",
     "devweb-only": "webpack-dev-server",
     "devapi": "nodemon --watch api ./api/index.js",
