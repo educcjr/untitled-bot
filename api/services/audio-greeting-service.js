@@ -12,9 +12,11 @@ class AudioGreetingService {
 
   async get (discordId) {
     return (await this.audioGreetingRepository.get(discordId))
-      .map(audio => {
-        return this.storageService.getUrl(audio.name);
-      });
+      .map(({ _id, name }) => ({
+        id: _id,
+        url: this.storageService.getUrl(name),
+        name: name
+      }));
   }
 
   async create (discordId, file) {

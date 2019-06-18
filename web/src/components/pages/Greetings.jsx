@@ -1,6 +1,4 @@
 import React from 'react';
-import App from '../../app';
-import { Link } from 'react-router-dom';
 
 // Container
 import AudioGreetings from '../../containers/audio-greetings';
@@ -14,20 +12,23 @@ import { Button } from '../../styles/layout/button';
 import { SecondTitle } from '../../styles/layout/header';
 
 export class GreetingsPage extends React.Component {
-  render() {
-    const users = this.props.users,
-          loadUsers = this.props.loadUsers,
-          greetingsService = this.props.greetingsService;
+  render () {
+    const {
+      users,
+      loadUsers,
+      greetingsService
+    } = this.props;
+
     return (
       <Background>
-        <Header title="titled bot" />
+        <Header title='titled bot' />
         <SecondTitle>Audio Greetings</SecondTitle>
         <AudioGreetings
           loadUsers={loadUsers}
           users={users}
           greetingsService={greetingsService}
         />
-        <Button home to='/'>Home</Button>
+        <Button to='/'>Home</Button>
       </Background>
     );
   }

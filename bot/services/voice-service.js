@@ -26,7 +26,7 @@ class VoiceService {
       return;
     }
 
-    this.voiceConn = this.getVoiceConnection(this.voiceConn, member);
+    this.voiceConn = await this.getVoiceConnection(this.voiceConn, member);
 
     this.playAudio(this.voiceConn, audios);
   }

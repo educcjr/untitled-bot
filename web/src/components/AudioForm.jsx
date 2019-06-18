@@ -1,19 +1,18 @@
 import React from 'react';
 
 // Styles
-import {
-  UntitledForm,
-  UntitledSelect,
-} from '../styles/layout/audioForm';
+import { UntitledForm, UntitledSelect } from '../styles/layout/audioForm';
 import { FileUpload, FilePicker, Submit } from '../styles/layout/fileUpload';
 
 export class AudioForm extends React.Component {
-  render() {
-    const onSubmit = this.props.onSubmit,
-          onUserChange = this.props.onUserChange,
-          userDiscordId = this.props.userDiscordId,
-          users = this.props.users,
-          onFileChange = this.props.onFileChange;
+  render () {
+    const {
+      onSubmit,
+      onUserChange,
+      userDiscordId,
+      users,
+      onFileChange
+    } = this.props;
 
     return (
       <UntitledForm onSubmit={onSubmit}>

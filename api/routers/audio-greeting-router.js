@@ -43,9 +43,9 @@ class AudioGreetingRouter {
       }
     });
 
-    router.delete('/:discordId', async (req, res) => {
+    router.delete('/:id', async (req, res) => {
       try {
-        res.send(await this.audioGreetingService.delete(req.params.discordId));
+        res.send(await this.audioGreetingService.delete(req.params.id));
       } catch (err) {
         res.sendError(err);
       }

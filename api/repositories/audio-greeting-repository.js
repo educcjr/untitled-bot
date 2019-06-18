@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const audioGreetingSchema = new mongoose.Schema({
-  discordId: { type: String, index: true },
+  discordId: String,
   name: String
 });
 
@@ -22,8 +22,8 @@ class AudioGreetingRepository {
     return this.model.create(audioGreeting);
   }
 
-  delete (discordId) {
-    return this.model.findOneAndDelete({ discordId });
+  delete (id) {
+    return this.model.findByIdAndDelete(id);
   }
 }
 

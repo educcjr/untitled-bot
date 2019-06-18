@@ -6,12 +6,11 @@
   "scripts": {
     "build": "webpack -p",
     "start": "pm2 startOrRestart process.yml",
-    "debugapi": "nodemon --inspect=9202 --watch api ./api/index.js",
-    "debugbot": "nodemon --inspect=9201 --watch bot ./bot/index.js",
-    "dev": "concurrently -k \"npm run debugbot\" \"npm run debugapi\" \"webpack-dev-server\"",
-    "devapi": "npm run debugapi",
-    "devbot": "concurrently -k \"npm run debugapi\" \"npm run debugbot\"",
-    "devui": "concurrently -k \"npm run debugapi\" \"webpack-dev-server\"",
+    "devbot-only": "nodemon --watch bot ./bot/index.js",
+    "devapi": "nodemon --watch api ./api/index.js",
+    "devbot": "concurrently -k \"npm run devapi\" \"npm run devbot-only\"",
+    "devui": "concurrently -k \"npm run devapi\" \"webpack-dev-server\"",
+    "dev": "concurrently -k \"npm run devapi\" \"npm run devbot-only\" \"webpack-dev-server\"",
     "test": ""
   },
   "author": "",

@@ -1,9 +1,11 @@
 import React from 'react';
 
 export class DeleteModal extends React.Component {
-  render() {
-    const toDelete = this.props.toDelete,
-          deleteAudio = this.props.deleteAudio;
+  render () {
+    const {
+      name,
+      deleteAudio
+    } = this.props;
 
     return (
       <div className='modal fade' id='deleteModal'>
@@ -16,7 +18,7 @@ export class DeleteModal extends React.Component {
               </button>
             </div>
             <div className='modal-body'>
-              <p>Delete {toDelete} file?</p>
+              <p>Delete {name} file?</p>
             </div>
             <div className='modal-footer'>
               <button
@@ -28,7 +30,7 @@ export class DeleteModal extends React.Component {
                 type='button'
                 className='btn btn-secondary'
                 style={{cursor: 'pointer'}}
-              data-dismiss='modal'>Close</button>
+                data-dismiss='modal'>Close</button>
             </div>
           </div>
         </div>

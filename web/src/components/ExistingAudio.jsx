@@ -10,28 +10,30 @@ import {
 import DeleteIcon from './icons/DeleteIcon';
 import '../styles/icons.css';
 
-export class ExistingAudio extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  render() {
-    const userAudioGreetings = this.props.userAudioGreetings,
-          playAudio = this.props.playAudio,
-          deleteConfirmation = this.props.deleteConfirmation;
+export class ExistingAudio extends React.Component {
+  render () {
+    const {
+      userAudioGreetings,
+      playAudio,
+      deleteConfirmation
+    } = this.props;
 
     return (
       <AudioContainer>
         <ThirdHeader>Current Greetings</ThirdHeader>
         <PlayList>
-          {userAudioGreetings.map((audio, index) =>
+          {userAudioGreetings.map(({ url, name, id }, index) =>
             <AudioGrid key={index}>
-              <Audio onClick={() => playAudio(audio.path)}>{audio.name}</Audio>
-              <DeleteButton type='button' onClick={() => deleteConfirmation(audio.name)}>
-                <DeleteIcon/>
+              <Audio onClick={() => playAudio(url)}>{name}</Audio>
+              <DeleteButton type='button' onClick={() => deleteConfirmation(name, id)}>
+                <DeleteIcon />
               </DeleteButton>
             </AudioGrid>
           )}
         </PlayList>
       </AudioContainer>
-      );
-      }
-    }
+    );
+  }
+}
 
 export default ExistingAudio;

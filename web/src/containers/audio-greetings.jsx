@@ -1,7 +1,6 @@
 import React from 'react';
 
 // Components
-import { Header } from '../components/Header';
 import { AudioForm } from '../components/AudioForm';
 import { ExistingAudio } from '../components/ExistingAudio';
 import { DeleteModal } from '../components/DeleteModal';
@@ -24,7 +23,8 @@ class AudioGreetings extends React.Component {
       audioFile: {},
       uploadResponse: '',
       userAudioGreetings: [],
-      toDelete: ''
+      toDeleteName: '',
+      toDeleteId: ''
     };
   }
 
@@ -55,39 +55,39 @@ class AudioGreetings extends React.Component {
 
   onSubmit (evt) {
     evt.preventDefault();
-    this.setState({uploadResponse: 'Enviando...'});
+    this.setState({ uploadResponse: 'Enviando...' });
     this.props.greetingsService.post(this.state.userDiscordId, this.state.audioFile)
-      .then(result => {
-        if (result.name) {
+      .then(({ id, name, url, message }) => {
+        if (name) {
           this.setState({
-            uploadResponse: `Arquivo ${result.name} enviado com sucesso.`,
+            uploadResponse: `Arquivo ${name} enviado com sucesso.`,
             userAudioGreetings: [
-              { name: result.name, path: result.path },
+              { id, name, url },
               ...this.state.userAudioGreetings
             ]
           });
         } else {
-          this.setState({uploadResponse: result.message});
+          this.setState({ uploadResponse: message });
         }
       });
   }
 
-  playAudio (path) {
-    let audio = new Audio(path);
+  playAudio (url) {
+    let audio = new Audio(url);
     audio.play();
   }
 
-  deleteConfirmation (name) {
-    this.setState({toDelete: name});
+  deleteConfirmation (name, id) {
+    this.setState({ toDeleteName: name, toDeleteId: id });
     $('#deleteModal').modal('show');
   }
 
   deleteAudio () {
-    this.props.greetingsService.delete(this.state.toDelete)
+    this.props.greetingsService.delete(this.state.toDeleteId)
       .then(() => {
         this.setState({
           userAudioGreetings: this.state.userAudioGreetings.filter(
-            file => file.name !== this.state.toDelete
+            ({ id }) => id !== this.state.toDeleteId
           )
         });
       });
@@ -121,7 +121,7 @@ class AudioGreetings extends React.Component {
 
         {/* Modal Component - Start */}
         <DeleteModal
-          toDelete={this.state.toDelete}
+          name={this.state.toDeleteName}
           deleteAudio={this.deleteAudio}
         />
         {/* Modal Component - End */}

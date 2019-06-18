@@ -4,38 +4,16 @@
             {
                 "type": "node",
                 "request": "launch",
-                "name": "Launch via NPM",
-                "runtimeExecutable": "npm",
-                "runtimeArgs": [
-                    "run-script",
-                    "devbot"
-                ],
-                "port": 5858
-            },
-            {
-                "name": "Attach to Process",
-                "type": "node",
+                "name": "Launch BOT",
                 "protocol": "inspector",
-                "request": "attach",
-                "port": 9201,
-                "localRoot": "${workspaceRoot}",
-                "remoteRoot": "/mnt/c/Users/Luiz Fernando/Documents/dev/untitled-bot"
+                "program": "${workspaceFolder}/bot/index.js"
             },
             {
-                "name": "Attach to BOT (WSL)",
                 "type": "node",
-                "request": "attach",
-                "port": 9201,
-                "localRoot": "${workspaceRoot}",
-                "remoteRoot": "/mnt/c/Users/Eduardo/Documents/repos/untitled-bot"
-            },
-            {
-                "name": "Attach to API (WSL)",
-                "type": "node",
-                "request": "attach",
-                "port": 9202,
-                "localRoot": "${workspaceRoot}",
-                "remoteRoot": "/mnt/c/Users/Eduardo/Documents/repos/untitled-bot"
+                "request": "launch",
+                "name": "Launch API",
+                "protocol": "inspector",
+                "program": "${workspaceFolder}/api/index.js"
             }
         ]
     }

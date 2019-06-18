@@ -9,7 +9,7 @@ class GreetingsService {
     let formData = new FormData();
     formData.append('id', id);
     formData.append('file', file);
-    return fetch(this.domain + '/greetings/audio', {
+    return fetch(this.domain + '/audio-greeting', {
       method: 'POST',
       body: formData
     })
@@ -17,17 +17,13 @@ class GreetingsService {
   }
 
   get (id) {
-    return fetch(`${this.domain}/greetings/audio/${id}`)
+    return fetch(`${this.domain}/audio-greeting/${id}`)
       .then(result => result.json());
   }
 
   delete (id) {
-    return fetch(this.domain + '/greetings/audio', {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({fileName: id})
+    return fetch(`${this.domain}/audio-greeting/${id}`, {
+      method: 'DELETE'
     })
       .then(result => result.json());
   }
