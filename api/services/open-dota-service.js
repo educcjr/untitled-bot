@@ -1,10 +1,10 @@
 const requestHelper = require('./../../common/request-helper');
 
-const API_PATH = 'https://api.opendota.com/api';
+const ODOTA_API = 'https://api.opendota.com/api';
 
 class OpenDotaService {
   async kdaMean (accountId, urlParams) {
-    let result = await requestHelper.get(`${API_PATH}/players/${accountId}/histograms/kda${urlParams}`);
+    let result = await requestHelper.get(`${ODOTA_API}/players/${accountId}/histograms/kda${urlParams}`);
 
     let sum = 0;
     let length = 0;

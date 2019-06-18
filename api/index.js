@@ -53,11 +53,9 @@ app.use('/audio-greeting', audioGreetingRouter.router());
 app.use('/mute', voteMuteRouter.router());
 app.use('/odota', openDotaRouter.router());
 
-const PORT = process.env.PORT || process.env.API_PORT;
-app.listen(PORT, () => {
-  console.log('Api running on: ' + PORT);
+app.listen(process.env.PORT, () => {
+  console.log('Api running on: ' + process.env.PORT);
   console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
-  console.log(`FIREBASE_KEY: ${process.env.FIREBASE_KEY}`);
 });
 
 module.exports = app;
