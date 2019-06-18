@@ -4,6 +4,7 @@ node_modules/
 app-configs.js
 keyfile.json
 firebase-key.json
+.env
 
 web/public/*
 !web/public/index.html

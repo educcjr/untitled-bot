@@ -1,8 +1,6 @@
 const requestHelper = require('./../../common/request-helper');
 
-const appConfigs = require('./../../app-configs');
-
-const USER_API_URL = `${appConfigs.API_PATH}/user`;
+const USER_API_URL = `${process.env.API_PATH}/user`;
 
 class UserService {
   create (discordId, name) {

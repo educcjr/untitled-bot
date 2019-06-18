@@ -1,5 +1,4 @@
 const firebase = require('firebase-admin');
-const firebaseKey = require('./../../firebase-key.json');
 
 const FOLDERS = {
   greetings: 'greetings'
@@ -9,12 +8,12 @@ const BUCKET_URL = `https://storage.googleapis.com/${BUCKET}`;
 
 class StorageService {
   constructor () {
-    firebase.initializeApp({
-      credential: firebase.credential.cert(firebaseKey),
+    const admin = firebase.initializeApp({
+      credential: firebase.credential.cert(JSON.parse(process.env.FIREBASE_KEY)),
       storageBucket: BUCKET
     });
 
-    this.bucket = firebase.storage().bucket();
+    this.bucket = admin.storage().bucket();
   }
 
   async uploadGreeting (path, filename) {

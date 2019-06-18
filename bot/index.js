@@ -1,7 +1,6 @@
+require('dotenv').config();
 const Discord = require('discord.js');
 const client = new Discord.Client();
-
-const appConfigs = require('./../app-configs');
 
 const UserRestService = require('./rest-services/user-rest-service');
 const ReplyService = require('./services/reply-service');
@@ -52,4 +51,4 @@ client.on('ready', () => {
   console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 });
 
-client.login(appConfigs.TOKEN);
+client.login(process.env.TOKEN);

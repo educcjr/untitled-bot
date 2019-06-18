@@ -6,8 +6,6 @@ const download = require('download');
 const mathHelper = require('./../../common/math-helper');
 const requestHelper = require('./../../common/request-helper');
 
-const appSettings = require('./../../app-configs');
-
 class VoiceService {
   constructor () {
     this.streaming = false;
@@ -35,7 +33,7 @@ class VoiceService {
     let audios = [];
 
     try {
-      audios = await requestHelper.get(`${appSettings.API_PATH}/audio-greeting/${discordId}`);
+      audios = await requestHelper.get(`${process.env.API_PATH}/audio-greeting/${discordId}`);
     } catch (err) {
       console.log(err);
     }
@@ -59,10 +57,10 @@ class VoiceService {
 
       let randomIndex = mathHelper.getRandomInt(0, audios.length - 1);
       let audioUrl = audios[randomIndex].url;
-      let localAudioPath = path.join(appSettings.AUDIO_GREETING_DIR, path.basename(audioUrl));
+      let localAudioPath = path.join(process.env.AUDIO_GREETING_DIR, path.basename(audioUrl));
 
       if (!fs.existsSync(localAudioPath)) {
-        await download(audioUrl, appSettings.AUDIO_GREETING_DIR);
+        await download(audioUrl, process.env.AUDIO_GREETING_DIR);
       }
 
       let dispatcher = conn.playFile(localAudioPath);

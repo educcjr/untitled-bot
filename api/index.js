@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
@@ -20,9 +21,7 @@ const AudioGreetingRouter = require('./routers/audio-greeting-router');
 const VoteMuteRouter = require('./routers/vote-mute-router');
 const OpenDotaRouter = require('./routers/open-dota-router');
 
-const appConfigs = require('./../app-configs');
-
-let connection = mongoose.createConnection(appConfigs.MLAB_CONN_STR);
+let connection = mongoose.createConnection(process.env.MLAB_CONN_STR);
 let storageService = new StorageService();
 
 let userRepository = new UserRepository(connection);
@@ -54,10 +53,11 @@ app.use('/audio-greeting', audioGreetingRouter.router());
 app.use('/mute', voteMuteRouter.router());
 app.use('/odota', openDotaRouter.router());
 
-const PORT = process.env.PORT || appConfigs.API_PORT;
+const PORT = process.env.PORT || process.env.API_PORT;
 app.listen(PORT, () => {
   console.log('Api running on: ' + PORT);
   console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`FIREBASE_KEY: ${process.env.FIREBASE_KEY}`);
 });
 
 module.exports = app;

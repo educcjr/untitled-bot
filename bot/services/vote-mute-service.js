@@ -4,9 +4,7 @@ const outdent = require('outdent');
 const requestHelper = require('./../../common/request-helper');
 const permissionsHelper = require('./../helpers/permissions-helper');
 
-const appConfigs = require('./../../app-configs');
-
-const VOTE_MUTE_API_URL = `${appConfigs.API_PATH}/mute`;
+const VOTE_MUTE_API_URL = `${process.env.API_PATH}/mute`;
 
 class VoteMuteService {
   constructor (afkChannelDiscordId) {
