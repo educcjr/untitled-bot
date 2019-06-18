@@ -21,7 +21,7 @@ class AudioGreetingService {
 
   async create (discordId, file) {
     if (path.extname(file.filename) !== '.mp3') {
-      throw new Error('Tipo de arquivo incorreto. Você está enviando um áudio?');
+      throw new Error('Tipo de arquivo incorreto.');
     }
 
     let resultPath = await this.storageService.uploadGreeting(file.path, file.filename);

@@ -58,7 +58,7 @@ class VoiceService {
       this.streaming = true;
 
       let randomIndex = mathHelper.getRandomInt(0, audios.length - 1);
-      let audioUrl = audios[randomIndex];
+      let audioUrl = audios[randomIndex].url;
       let localAudioPath = path.join(appSettings.AUDIO_GREETING_DIR, path.basename(audioUrl));
 
       if (!fs.existsSync(localAudioPath)) {
