@@ -2,30 +2,25 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:7.10
+      - image: circleci/node:10.16.0
     working_directory: ~/repo
     steps:
       - checkout
-
       - restore_cache:
           keys:
             - v1-dependencies-{{ arch }}-{{ checksum "package.json" }}
             - v1-dependencies-{{ arch }}
-
       - run: npm install
-
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ arch }}-{{ checksum "package.json" }}
-
-      - add_ssh_keys:
-          fingerprints:
-            - "07:d7:a2:e6:44:68:c5:49:7d:28:0d:29:19:b4:53:85"
-
-      - deploy:
-          name: gce deploy
+  deploy:
+    docker:
+      - image: buildpack-deps:trusty
+    steps:
+      - checkout
+      - run:
+          name: Deploy Master to Heroku
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              ssh -oStrictHostKeyChecking=no ${GCE_USERNAME}@${GCE_EXTERNAL_IP} "bash ~/scripts/deploy.sh"
-            fi
+            git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git master
