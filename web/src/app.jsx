@@ -17,8 +17,8 @@ class App extends React.Component {
     super(props);
     this.loadUsers = this.loadUsers.bind(this);
 
-    const apiDomain = window.document.origin === 'http://www.untitled-lounge.com'
-      ? 'http://35.193.250.139'
+    const apiDomain = window.origin === 'http://www.untitled-lounge.com'
+      ? 'https://untitled-lounge.herokuapp.com'
       : 'http://localhost:5000';
     this.userService = new UserService(apiDomain);
     this.greetingsService = new GreetingsService(apiDomain);
